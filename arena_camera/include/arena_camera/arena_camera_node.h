@@ -40,6 +40,8 @@
 #include <ros/ros.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/image_encodings.h>
+// Added
+#include <sensor_msgs/PointCloud2.h>
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
@@ -369,6 +371,17 @@ protected:
 
   image_transport::ImageTransport* it_;
   image_transport::CameraPublisher img_raw_pub_;
+
+  // Added
+
+  // PointCloud Publisher and Message
+  ros::Publisher point_cloud_pub_;
+  sensor_msgs::PointCloud2 point_cloud_msg_;
+  // Scales and Offsets for x, y and z
+  float scale_x, scale_y, scale_z, offset_x, offset_y;
+
+  // End Added
+
 
   ros::Publisher* img_rect_pub_;
   image_geometry::PinholeCameraModel* pinhole_model_;

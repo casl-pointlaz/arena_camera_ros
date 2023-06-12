@@ -286,6 +286,13 @@ public:
    */
   bool auto_flash_line_3_;
 
+  // Added
+
+  /** Flag to indicates if we want to publish the PointCloud or not */
+  bool publish_point_cloud_;
+
+  // End Added
+
 protected:
   /**
    * Validates the parameter set found on the ros parameter server.

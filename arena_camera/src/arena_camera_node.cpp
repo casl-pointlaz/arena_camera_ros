@@ -453,7 +453,9 @@ bool ArenaCameraNode::startGrabbing()
 
     // exposure_auto_ will be already set to false if exposure_given_ is true
     // read params () solved the priority between them
-    if (arena_camera_parameter_set_.exposure_auto_)
+
+    // Modified because Helios 2+ do not have ExposureAuto feature
+    /* if (arena_camera_parameter_set_.exposure_auto_)
     {
       Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "ExposureAuto", "Continuous");
       // todo update parameter on the server
@@ -464,7 +466,7 @@ bool ArenaCameraNode::startGrabbing()
       Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "ExposureAuto", "Off");
       // todo update parameter on the server
       ROS_INFO_STREAM("Settings Exposure to off/false");
-    }
+    } */
 
     if (arena_camera_parameter_set_.exposure_given_)
      {
@@ -484,7 +486,9 @@ bool ArenaCameraNode::startGrabbing()
     
     // gain_auto_ will be already set to false if gain_given_ is true
     // read params () solved the priority between them
-    if (arena_camera_parameter_set_.gain_auto_)
+
+    // Modified because Helios 2+ do not have GainAuto feature
+    /*if (arena_camera_parameter_set_.gain_auto_)
     {
       Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "GainAuto", "Continuous");
       // todo update parameter on the server
@@ -495,7 +499,7 @@ bool ArenaCameraNode::startGrabbing()
       Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "GainAuto", "Off");
       // todo update parameter on the server
       ROS_INFO_STREAM("Settings Gain to off/false");
-    }
+    } */
 
     if (arena_camera_parameter_set_.gain_given_)
     {
@@ -630,6 +634,54 @@ bool ArenaCameraNode::startGrabbing()
   // already contains the number of channels
   img_raw_msg_.step = img_raw_msg_.width * (pImage_->GetBitsPerPixel() / 8);
 
+  // Added
+
+  // Init point_cloud_msg_
+  if(img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
+  {
+    point_cloud_msg_.header.frame_id = img_raw_msg_.header.frame_id;
+    point_cloud_msg_.height = img_raw_msg_.height;
+    point_cloud_msg_.width = img_raw_msg_.width;
+    point_cloud_msg_.fields.resize(5);
+    point_cloud_msg_.fields[0].name = "x";
+    point_cloud_msg_.fields[0].offset = 0;
+    point_cloud_msg_.fields[0].datatype = 7;
+    point_cloud_msg_.fields[0].count = 1;
+    point_cloud_msg_.fields[1].name = "y";
+    point_cloud_msg_.fields[1].offset = 4;
+    point_cloud_msg_.fields[1].datatype = 7;
+    point_cloud_msg_.fields[1].count = 1;
+    point_cloud_msg_.fields[2].name = "z";
+    point_cloud_msg_.fields[2].offset = 8;
+    point_cloud_msg_.fields[2].datatype = 7;
+    point_cloud_msg_.fields[2].count = 1;
+    point_cloud_msg_.fields[3].name = "intensity";
+    point_cloud_msg_.fields[3].offset = 12;
+    point_cloud_msg_.fields[3].datatype = 7;
+    point_cloud_msg_.fields[3].count = 1;
+    point_cloud_msg_.fields[4].name = "timestamp";
+    point_cloud_msg_.fields[4].offset = 16;
+    point_cloud_msg_.fields[4].datatype = 8;
+    point_cloud_msg_.fields[4].count = 1;
+    point_cloud_msg_.is_bigendian = false;
+    point_cloud_msg_.point_step = 24;
+    point_cloud_msg_.row_step = point_cloud_msg_.width * point_cloud_msg_.point_step;
+    point_cloud_msg_.is_dense = true;
+
+    // Code get from ArenaSDK_Linux_x64/Examples/Arena/Cpp_Helios_MinMaxDepth/Cpp_Helios_MinMaxDepth.cpp
+    // Code to get the scales and offsets for x, y and z
+    Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateA");
+    scale_x = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
+    offset_x = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateOffset"));
+    Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateB");
+    scale_y = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
+    offset_y = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateOffset"));
+    Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateC");
+    scale_z = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
+  }
+
+  // End Added
+
   if (!camera_info_manager_->setCameraName(
           std::string(Arena::GetNodeValue<GenICam::gcstring>(pNodeMap, "DeviceUserID").c_str())))
   {
@@ -753,6 +805,39 @@ void ArenaCameraNode::spin()
       // Publish via image_transport
       img_raw_pub_.publish(img_raw_msg_, *cam_info);
       ROS_INFO_ONCE("Number subscribers received");
+    }
+
+    // Added: fill the PointCloud message
+    if(point_cloud_pub_.getNumSubscribers() > 0 && img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
+    {
+        point_cloud_msg_.header.stamp = img_raw_msg_.header.stamp;
+        int size_img = img_raw_msg_.height * img_raw_msg_.step;
+        int data;
+        float *value;
+        double *timestamp;
+        *timestamp = point_cloud_msg_.header.stamp.toSec();
+        for(int i = 0 ; i < size_img ; i = i + 8)
+        {
+            // Convert x to PointCloud
+            data = (img_raw_msg_.data[i] << 8) + img_raw_msg_.data[i+1];
+            *value = (float)data * scale_x + offset_x;
+            memcpy(&point_cloud_msg_.data[i], value, 4);
+            // Convert y to PointCloud
+            data = (img_raw_msg_.data[i+2] << 8) + img_raw_msg_.data[i+3];
+            *value = (float)data * scale_y + offset_y;
+            memcpy(&point_cloud_msg_.data[i+4], value, 4);
+            // Convert z to PointCloud
+            data = (img_raw_msg_.data[i+4] << 8) + img_raw_msg_.data[i+5];
+            *value = (float)data * scale_z;
+            memcpy(&point_cloud_msg_.data[i+8], value, 4);
+            // Convert intensity to PointCloud
+            data = (img_raw_msg_.data[i+6] << 8) + img_raw_msg_.data[i+7];
+            *value = (float)data;
+            memcpy(&point_cloud_msg_.data[i+12], value, 4);
+            // Convert timestamp to PointCloud
+            memcpy(&point_cloud_msg_.data[i+16], timestamp, 8);
+        }
+        point_cloud_pub_.publish(point_cloud_msg_);
     }
 
     if (getNumSubscribersRect() > 0 && camera_info_manager_->isCalibrated())
