@@ -78,6 +78,7 @@ ArenaCameraNode::ArenaCameraNode()
   , it_(new image_transport::ImageTransport(nh_))
   , img_raw_pub_(it_->advertiseCamera("image_raw", 1))
   , img_rect_pub_(nullptr)
+  , point_cloud_pub_(nullptr)       // Added
   , grab_imgs_raw_as_(nh_, "grab_images_raw", boost::bind(&ArenaCameraNode::grabImagesRawActionExecuteCB, this, _1),
                       false)
   , grab_imgs_rect_as_(nullptr)
@@ -678,6 +679,8 @@ bool ArenaCameraNode::startGrabbing()
     offset_y = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateOffset"));
     Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateC");
     scale_z = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
+
+    point_cloud_pub_ = new ros::Publisher(nh_.advertise<sensor_msgs::PointCloud2>("point_cloud", 1));
   }
 
   // End Added
@@ -808,7 +811,7 @@ void ArenaCameraNode::spin()
     }
 
     // Added: fill the PointCloud message
-    if(point_cloud_pub_.getNumSubscribers() > 0 && img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
+    if(point_cloud_pub_->getNumSubscribers() > 0 && img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
     {
         point_cloud_msg_.header.stamp = img_raw_msg_.header.stamp;
         int size_img = img_raw_msg_.height * img_raw_msg_.step;
@@ -837,7 +840,7 @@ void ArenaCameraNode::spin()
             // Convert timestamp to PointCloud
             memcpy(&point_cloud_msg_.data[i+16], timestamp, 8);
         }
-        point_cloud_pub_.publish(point_cloud_msg_);
+        point_cloud_pub_->publish(point_cloud_msg_);
     }
 
     if (getNumSubscribersRect() > 0 && camera_info_manager_->isCalibrated())
@@ -2076,6 +2079,16 @@ ArenaCameraNode::~ArenaCameraNode()
     delete pinhole_model_;
     pinhole_model_ = nullptr;
   }
+
+  // Added
+
+  if(point_cloud_pub_)
+  {
+    delete point_cloud_pub_;
+    point_cloud_pub_ = nullptr;
+  }
+
+  // End Added
 }
 
 }  // namespace arena_camera

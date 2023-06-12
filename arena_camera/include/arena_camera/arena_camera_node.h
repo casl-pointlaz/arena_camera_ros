@@ -375,7 +375,7 @@ protected:
   // Added
 
   // PointCloud Publisher and Message
-  ros::Publisher point_cloud_pub_;
+  ros::Publisher *point_cloud_pub_;
   sensor_msgs::PointCloud2 point_cloud_msg_;
   // Scales and Offsets for x, y and z
   float scale_x, scale_y, scale_z, offset_x, offset_y;
