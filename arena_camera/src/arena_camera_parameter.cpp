@@ -376,7 +376,7 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
   // Added
 
   // Get publish_point_cloud
-  nh.param<bool>("publish_point_cloud_", publish_point_cloud_, false);
+  nh.param<bool>("publish_point_cloud", publish_point_cloud_, false);
 
   // End Added
 
