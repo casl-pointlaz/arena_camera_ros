@@ -363,7 +363,7 @@ bool ArenaCameraNode::setImageEncoding(const std::string& ros_encoding)
                                                       << "' to a corresponding GenAPI encoding! Will use current "
                                                       << "pixel format ( "
                                                       << fallbackPixelFormat
-                                                      << " ) as fallback!"); 
+                                                      << " ) as fallback!");
       return false;
     }
   }
@@ -422,13 +422,13 @@ bool ArenaCameraNode::startGrabbing()
     if (cmdlnParamFrameRate >= maximumFrameRate)
     {
       arena_camera_parameter_set_.setFrameRate(nh_, maximumFrameRate);
-      
+
       ROS_WARN("Desired framerate %.2f Hz (rounded) is higher than max possible. Will limit "
               "framerate device max : %.2f Hz (rounded)", cmdlnParamFrameRate, maximumFrameRate);
     }
     // special case:
     // dues to inacurate float comparision we skip. If we set it it might
-    // throw becase it could be a lil larger than the max avoid the exception (double accuracy issue when setting the node) 
+    // throw becase it could be a lil larger than the max avoid the exception (double accuracy issue when setting the node)
     // request frame rate very close to device max
     else if (cmdlnParamFrameRate == maximumFrameRate){
       ROS_INFO("Framerate is %.2f Hz", cmdlnParamFrameRate);
@@ -437,13 +437,13 @@ bool ArenaCameraNode::startGrabbing()
     else if (cmdlnParamFrameRate == -1) // speacial for max frame rate available
     {
       arena_camera_parameter_set_.setFrameRate(nh_, maximumFrameRate);
-      
+
       ROS_WARN("Framerate is set to device max : %.2f Hz", maximumFrameRate);
     }
     // requested framerate is valid so we set it to the device
     else{
       Arena::SetNodeValue<bool>(pNodeMap, "AcquisitionFrameRateEnable", true);
-      Arena::SetNodeValue<double>(pNodeMap, "AcquisitionFrameRate" , 
+      Arena::SetNodeValue<double>(pNodeMap, "AcquisitionFrameRate" ,
                                       cmdlnParamFrameRate);
       ROS_INFO("Framerate is set to: %.2f Hz", cmdlnParamFrameRate);
     }
@@ -474,7 +474,7 @@ bool ArenaCameraNode::startGrabbing()
       float reached_exposure;
       if (setExposure(arena_camera_parameter_set_.exposure_, reached_exposure))
       {
-        // Note: ont update the ros param because it might keep 
+        // Note: ont update the ros param because it might keep
         // decreasing or incresing overtime when rerun
         ROS_INFO_STREAM("Setting exposure to " << arena_camera_parameter_set_.exposure_
                                                << ", reached: " << reached_exposure);
@@ -484,7 +484,7 @@ bool ArenaCameraNode::startGrabbing()
     //
     // GAIN
     //
-    
+
     // gain_auto_ will be already set to false if gain_given_ is true
     // read params () solved the priority between them
 
@@ -507,7 +507,7 @@ bool ArenaCameraNode::startGrabbing()
       float reached_gain;
       if (setGain(arena_camera_parameter_set_.gain_, reached_gain))
       {
-        // Note: ont update the ros param because it might keep 
+        // Note: ont update the ros param because it might keep
         // decreasing or incresing overtime when rerun
         ROS_INFO_STREAM("Setting gain to: " << arena_camera_parameter_set_.gain_ << ", reached: " << reached_gain);
       }
@@ -660,14 +660,11 @@ bool ArenaCameraNode::startGrabbing()
     point_cloud_msg_.fields[3].offset = 12;
     point_cloud_msg_.fields[3].datatype = 7;
     point_cloud_msg_.fields[3].count = 1;
-    point_cloud_msg_.fields[4].name = "timestamp";
-    point_cloud_msg_.fields[4].offset = 16;
-    point_cloud_msg_.fields[4].datatype = 8;
-    point_cloud_msg_.fields[4].count = 1;
     point_cloud_msg_.is_bigendian = false;
-    point_cloud_msg_.point_step = 24;
+    point_cloud_msg_.point_step = 16;
     point_cloud_msg_.row_step = point_cloud_msg_.width * point_cloud_msg_.point_step;
     point_cloud_msg_.is_dense = true;
+    point_cloud_msg_.data.resize(point_cloud_msg_.height * point_cloud_msg_.row_step);
 
     // Code get from ArenaSDK_Linux_x64/Examples/Arena/Cpp_Helios_MinMaxDepth/Cpp_Helios_MinMaxDepth.cpp
     // Code to get the scales and offsets for x, y and z
@@ -762,6 +759,7 @@ uint32_t ArenaCameraNode::getNumSubscribersRaw() const
 
 void ArenaCameraNode::spin()
 {
+  ros::Time start_time = ros::Time::now();
   if (camera_info_manager_->isCalibrated())
   {
     ROS_INFO_ONCE("Camera is calibrated");
@@ -787,9 +785,9 @@ void ArenaCameraNode::spin()
     return;
   }
 
-  if (!isSleeping() && (img_raw_pub_.getNumSubscribers() || getNumSubscribersRect()))
+  if (!isSleeping() && (img_raw_pub_.getNumSubscribers() || getNumSubscribersRect() || (point_cloud_pub_->getNumSubscribers() > 0 && img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)))
   {
-    if (getNumSubscribersRaw() || getNumSubscribersRect())
+    if (getNumSubscribersRaw() || getNumSubscribersRect() || (point_cloud_pub_->getNumSubscribers() > 0 && img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_))
     {
       if (!grabImage())
       {
@@ -813,32 +811,30 @@ void ArenaCameraNode::spin()
     // Added: fill the PointCloud message
     if(point_cloud_pub_->getNumSubscribers() > 0 && img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
     {
-        point_cloud_msg_.header.stamp = img_raw_msg_.header.stamp;
+        point_cloud_msg_.header.stamp = ros::Time::now();
         int size_img = img_raw_msg_.height * img_raw_msg_.step;
         int data;
         float *value;
-        double *timestamp;
-        *timestamp = point_cloud_msg_.header.stamp.toSec();
+        int j = 0;
         for(int i = 0 ; i < size_img ; i = i + 8)
         {
-            // Convert x to PointCloud
-            data = (img_raw_msg_.data[i] << 8) + img_raw_msg_.data[i+1];
-            *value = (float)data * scale_x + offset_x;
-            memcpy(&point_cloud_msg_.data[i], value, 4);
-            // Convert y to PointCloud
-            data = (img_raw_msg_.data[i+2] << 8) + img_raw_msg_.data[i+3];
-            *value = (float)data * scale_y + offset_y;
-            memcpy(&point_cloud_msg_.data[i+4], value, 4);
-            // Convert z to PointCloud
-            data = (img_raw_msg_.data[i+4] << 8) + img_raw_msg_.data[i+5];
-            *value = (float)data * scale_z;
-            memcpy(&point_cloud_msg_.data[i+8], value, 4);
-            // Convert intensity to PointCloud
-            data = (img_raw_msg_.data[i+6] << 8) + img_raw_msg_.data[i+7];
-            *value = (float)data;
-            memcpy(&point_cloud_msg_.data[i+12], value, 4);
-            // Convert timestamp to PointCloud
-            memcpy(&point_cloud_msg_.data[i+16], timestamp, 8);
+          // Convert x to PointCloud
+          data = (img_raw_msg_.data[i] << 8) + img_raw_msg_.data[i+1];
+          *value = (float)data * scale_x + offset_x;
+          memcpy(&point_cloud_msg_.data[j], value, 4);
+          // Convert y to PointCloud
+          data = (img_raw_msg_.data[i+2] << 8) + img_raw_msg_.data[i+3];
+          *value = (float)data * scale_y + offset_y;
+          memcpy(&point_cloud_msg_.data[j+4], value, 4);
+          // Convert z to PointCloud
+          data = (img_raw_msg_.data[i+4] << 8) + img_raw_msg_.data[i+5];
+          *value = (float)data * scale_z;
+          memcpy(&point_cloud_msg_.data[j+8], value, 4);
+          // Convert intensity to PointCloud
+          data = (img_raw_msg_.data[i+6] << 8) + img_raw_msg_.data[i+7];
+          *value = (float)data;
+          memcpy(&point_cloud_msg_.data[j+12], value, 4);
+          j += 16;
         }
         point_cloud_pub_->publish(point_cloud_msg_);
     }
@@ -854,6 +850,7 @@ void ArenaCameraNode::spin()
       ROS_INFO_ONCE("Number subscribers rect received");
     }
   }
+  ROS_INFO_STREAM("time = " << ros::Time::now().toSec() - start_time.toSec());
 }
 
 bool ArenaCameraNode::grabImage()
