@@ -638,6 +638,7 @@ bool ArenaCameraNode::startGrabbing()
   // Added
 
   // Init point_cloud_msg_
+  point_cloud_pub_ = new ros::Publisher(nh_.advertise<sensor_msgs::PointCloud2>("point_cloud", 1));
   if(img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
   {
     // Code get from ArenaSDK_Linux_x64/Examples/Arena/Cpp_Helios_MinMaxDepth/Cpp_Helios_MinMaxDepth.cpp
@@ -654,8 +655,6 @@ bool ArenaCameraNode::startGrabbing()
     ROS_INFO_STREAM("scale_x = " << scale_x << " ; offset_x = " << offset_x);
     ROS_INFO_STREAM("scale_y = " << scale_y << " ; offset_y = " << offset_y);
     ROS_INFO_STREAM("scale_z = " << scale_z);
-
-    point_cloud_pub_ = new ros::Publisher(nh_.advertise<sensor_msgs::PointCloud2>("point_cloud", 1));
   }
 
   // End Added
@@ -801,16 +800,16 @@ void ArenaCameraNode::spin()
         for(int i = 0 ; i < size_img ; i++)
         {
           // x
-          data = (img_raw_msg_.data[i*8] << 8) + img_raw_msg_.data[i*8+1];
+          data = (img_raw_msg_.data[i*8+1] << 8) + img_raw_msg_.data[i*8];
           point_cloud.points[i].x = (data * scale_x + offset_x) * 0.001;
           // y
-          data = (img_raw_msg_.data[i*8+2] << 8) + img_raw_msg_.data[i*8+3];
+          data = (img_raw_msg_.data[i*8+3] << 8) + img_raw_msg_.data[i*8+2];
           point_cloud.points[i].y = (data * scale_y + offset_y) * 0.001;
           // z
-          data = (img_raw_msg_.data[i*8+4] << 8) + img_raw_msg_.data[i*8+5];
+          data = (img_raw_msg_.data[i*8+5] << 8) + img_raw_msg_.data[i*8+4];
           point_cloud.points[i].z = (data * scale_z) * 0.001;
           // intensity
-          data = (img_raw_msg_.data[i*8+6] << 8) + img_raw_msg_.data[i*8+7];
+          data = (img_raw_msg_.data[i*8+7] << 8) + img_raw_msg_.data[i*8+6];
           point_cloud.points[i].intensity = (float)data;
         }
         sensor_msgs::PointCloud2 point_cloud_msg;
