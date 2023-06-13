@@ -4,6 +4,7 @@
     <arg name="debug" default="false" />
     <arg name="node_name" default="arena_camera_node" />
     <arg name="config_file" default="$(find arena_camera)/config/default.yaml" />
+    <arg name="open_rviz" default="false" />
 
     <arg unless="$(arg debug)" name="launch_prefix" value="" />
     <arg     if="$(arg debug)" name="launch_prefix" value="gdb -ex run --args" />
@@ -12,4 +13,9 @@
           respawn="$(arg respawn)" launch-prefix="$(arg launch_prefix)">
         <rosparam command="load" file="$(arg config_file)" />
     </node>
+
+    <!-- Launch Rviz if open_rviz == true -->
+    <group if="$(arg open_rviz)">
+        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find arena_camera)/rviz/arena_camera_config.rviz" />
+    </group>
 </launch>

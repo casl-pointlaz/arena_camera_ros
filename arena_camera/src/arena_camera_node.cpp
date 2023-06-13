@@ -640,32 +640,6 @@ bool ArenaCameraNode::startGrabbing()
   // Init point_cloud_msg_
   if(img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
   {
-    point_cloud_msg_.header.frame_id = img_raw_msg_.header.frame_id;
-    point_cloud_msg_.height = img_raw_msg_.height;
-    point_cloud_msg_.width = img_raw_msg_.width;
-    point_cloud_msg_.fields.resize(5);
-    point_cloud_msg_.fields[0].name = "x";
-    point_cloud_msg_.fields[0].offset = 0;
-    point_cloud_msg_.fields[0].datatype = 7;
-    point_cloud_msg_.fields[0].count = 1;
-    point_cloud_msg_.fields[1].name = "y";
-    point_cloud_msg_.fields[1].offset = 4;
-    point_cloud_msg_.fields[1].datatype = 7;
-    point_cloud_msg_.fields[1].count = 1;
-    point_cloud_msg_.fields[2].name = "z";
-    point_cloud_msg_.fields[2].offset = 8;
-    point_cloud_msg_.fields[2].datatype = 7;
-    point_cloud_msg_.fields[2].count = 1;
-    point_cloud_msg_.fields[3].name = "intensity";
-    point_cloud_msg_.fields[3].offset = 12;
-    point_cloud_msg_.fields[3].datatype = 7;
-    point_cloud_msg_.fields[3].count = 1;
-    point_cloud_msg_.is_bigendian = false;
-    point_cloud_msg_.point_step = 16;
-    point_cloud_msg_.row_step = point_cloud_msg_.width * point_cloud_msg_.point_step;
-    point_cloud_msg_.is_dense = true;
-    point_cloud_msg_.data.resize(point_cloud_msg_.height * point_cloud_msg_.row_step);
-
     // Code get from ArenaSDK_Linux_x64/Examples/Arena/Cpp_Helios_MinMaxDepth/Cpp_Helios_MinMaxDepth.cpp
     // Code to get the scales and offsets for x, y and z
     Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateA");
@@ -676,6 +650,10 @@ bool ArenaCameraNode::startGrabbing()
     offset_y = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateOffset"));
     Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateC");
     scale_z = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
+
+    ROS_INFO_STREAM("scale_x = " << scale_x << " ; offset_x = " << offset_x);
+    ROS_INFO_STREAM("scale_y = " << scale_y << " ; offset_y = " << offset_y);
+    ROS_INFO_STREAM("scale_z = " << scale_z);
 
     point_cloud_pub_ = new ros::Publisher(nh_.advertise<sensor_msgs::PointCloud2>("point_cloud", 1));
   }
@@ -811,32 +789,34 @@ void ArenaCameraNode::spin()
     // Added: fill the PointCloud message
     if(point_cloud_pub_->getNumSubscribers() > 0 && img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
     {
-        point_cloud_msg_.header.stamp = ros::Time::now();
-        int size_img = img_raw_msg_.height * img_raw_msg_.step;
+        pcl::PointCloud<pcl::PointXYZI> point_cloud;
+        point_cloud.height = img_raw_msg_.height;
+        point_cloud.width = img_raw_msg_.width;
+        point_cloud.is_dense = true;
+        point_cloud.points.resize(point_cloud.height * point_cloud.width);
+        int size_img = point_cloud.points.size();
+        point_cloud.points.resize(size_img);
         int data;
-        float *value;
         int j = 0;
-        for(int i = 0 ; i < size_img ; i = i + 8)
+        for(int i = 0 ; i < size_img ; i++)
         {
-          // Convert x to PointCloud
-          data = (img_raw_msg_.data[i] << 8) + img_raw_msg_.data[i+1];
-          *value = (float)data * scale_x + offset_x;
-          memcpy(&point_cloud_msg_.data[j], value, 4);
-          // Convert y to PointCloud
-          data = (img_raw_msg_.data[i+2] << 8) + img_raw_msg_.data[i+3];
-          *value = (float)data * scale_y + offset_y;
-          memcpy(&point_cloud_msg_.data[j+4], value, 4);
-          // Convert z to PointCloud
-          data = (img_raw_msg_.data[i+4] << 8) + img_raw_msg_.data[i+5];
-          *value = (float)data * scale_z;
-          memcpy(&point_cloud_msg_.data[j+8], value, 4);
-          // Convert intensity to PointCloud
-          data = (img_raw_msg_.data[i+6] << 8) + img_raw_msg_.data[i+7];
-          *value = (float)data;
-          memcpy(&point_cloud_msg_.data[j+12], value, 4);
-          j += 16;
+          // x
+          data = (img_raw_msg_.data[i*8] << 8) + img_raw_msg_.data[i*8+1];
+          point_cloud.points[i].x = (data * scale_x + offset_x) * 0.001;
+          // y
+          data = (img_raw_msg_.data[i*8+2] << 8) + img_raw_msg_.data[i*8+3];
+          point_cloud.points[i].y = (data * scale_y + offset_y) * 0.001;
+          // z
+          data = (img_raw_msg_.data[i*8+4] << 8) + img_raw_msg_.data[i*8+5];
+          point_cloud.points[i].z = (data * scale_z) * 0.001;
+          // intensity
+          data = (img_raw_msg_.data[i*8+6] << 8) + img_raw_msg_.data[i*8+7];
+          point_cloud.points[i].intensity = (float)data;
         }
-        point_cloud_pub_->publish(point_cloud_msg_);
+        sensor_msgs::PointCloud2 point_cloud_msg;
+        pcl::toROSMsg(point_cloud, point_cloud_msg);
+        point_cloud_msg.header = img_raw_msg_.header;
+        point_cloud_pub_->publish(point_cloud_msg);
     }
 
     if (getNumSubscribersRect() > 0 && camera_info_manager_->isCalibrated())
@@ -850,7 +830,7 @@ void ArenaCameraNode::spin()
       ROS_INFO_ONCE("Number subscribers rect received");
     }
   }
-  ROS_INFO_STREAM("time = " << ros::Time::now().toSec() - start_time.toSec());
+  ROS_INFO_STREAM("Elapsed time = " << ros::Time::now().toSec() - start_time.toSec());
 }
 
 bool ArenaCameraNode::grabImage()

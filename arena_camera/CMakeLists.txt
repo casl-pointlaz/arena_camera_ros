@@ -1,6 +1,9 @@
 # http://wiki.ros.org/catkin/CMakeLists.txt
 # using catkin must follow the structure and order ectribed in the file above
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # -----------------------------------------------------------------------------
 #
 # 1
@@ -55,6 +58,8 @@ set(CATKIN_COMPONENTS
      roslint
      roslaunch 
      sensor_msgs
+     pcl_ros
+     pcl_conversions
 )
 
 ## Find catkin macros and libraries

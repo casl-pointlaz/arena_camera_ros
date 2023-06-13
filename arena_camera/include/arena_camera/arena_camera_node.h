@@ -41,7 +41,12 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/image_encodings.h>
 // Added
+
+#include <pcl_ros/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
+
+// End Added
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
@@ -374,9 +379,8 @@ protected:
 
   // Added
 
-  // PointCloud Publisher and Message
+  // PointCloud Publisher
   ros::Publisher *point_cloud_pub_;
-  sensor_msgs::PointCloud2 point_cloud_msg_;
   // Scales and Offsets for x, y and z
   float scale_x, scale_y, scale_z, offset_x, offset_y;
 
