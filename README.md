@@ -26,4 +26,28 @@ git push
 
 ## Time of Flight cameras configuration
 
+### Ethernet configuration
 Follow the instructions in *~/ArenaSDK_Linux_x64/docs/html/arena_sdk_linux.html* to configure the Ethernet ports for the cameras.
+
+### Device User ID configuration to run multiple ToF at the same time
+To differentiate the cameras, the ROS node use the Device User ID of each camera.  
+This ID has to be set manually by the user. The node **write_device_user_id_to_camera** has been made specially for this.  
+Follow the next steps to configure the Device User ID of your cameras:
+1. We consider the Ethernet configuration of your cameras is properly done.
+2. Identify the camera you want to be the **number 0** and the one you want to be the **number 1**.
+3. Disconnect the Ethernet port of the **camera 1** (either manually or by clicking on the arrow down at the top right of your screen, **Settings**, **Network** and then toggling the purple button of the Ethernet port).
+4. Run the next command:
+```
+ rosrun arena_camera write_device_user_id_to_camera "camera_ToF_0"
+```
+5. Reconnect your **camera 1**.
+6. Disconnect your **camera 0**.
+7. Run the next command:
+```
+ rosrun arena_camera write_device_user_id_to_camera "camera_ToF_1"
+```
+8. Reconnect your **camera 0**.
+9. The Device User ID of your cameras should be properly configured. You can now run the next command to run 2 ToF cameras at the same time:
+```
+ roslaunch arena_camera multi_arena_camera_node.launch
+```
