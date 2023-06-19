@@ -282,6 +282,14 @@ protected:
   bool setGammaCallback(camera_control_msgs::SetGamma::Request& req, camera_control_msgs::SetGamma::Response& res);
 
   /**
+  * Update the Scan3dSpatialFilterEnable flag to enable Scan 3d Spatial Filter
+  * @param target_scan_3d_spatial_filter_enable the target value
+  * @param reached_scan_3d_spatial_filter_enable_ the value that could be reached
+  * @return true if the targeted value could be reached
+  */
+  bool setScan3dSpatialFilterEnable(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable_);
+
+  /**
   * Callback that puts the camera to sleep
   * @param req request
   * @param res response

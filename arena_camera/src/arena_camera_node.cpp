@@ -595,6 +595,20 @@ bool ArenaCameraNode::startGrabbing()
 
     Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetTLStreamNodeMap(), "StreamBufferHandlingMode", "NewestOnly");
 
+    // Added
+
+    // Enable Scan 3d Spatial Filter
+    bool reached_scan_3d_spatial_filter_enable;
+    if (setScan3dSpatialFilterEnable(arena_camera_parameter_set_.scan_3d_spatial_filter_enable_, reached_scan_3d_spatial_filter_enable))
+    {
+      if(reached_scan_3d_spatial_filter_enable)
+        ROS_INFO_STREAM("Scan3dSpatialFilter Enabled");
+      else
+        ROS_INFO_STREAM("Scan3dSpatialFilter Disabled");
+    }
+
+    // End Added
+
     //
     // Trigger Image
     //
@@ -639,35 +653,21 @@ bool ArenaCameraNode::startGrabbing()
 
   // Init point_cloud_msg_
   point_cloud_pub_ = new ros::Publisher(nh_.advertise<sensor_msgs::PointCloud2>("point_cloud", 1));
-  if(img_raw_msg_.encoding == "16UC4" && arena_camera_parameter_set_.publish_point_cloud_)
-  {
-    // Code get from ArenaSDK_Linux_x64/Examples/Arena/Cpp_Helios_MinMaxDepth/Cpp_Helios_MinMaxDepth.cpp
-    // Code to get the scales and offsets for x, y and z
-    Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateA");
-    scale_x = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
-    offset_x = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateOffset"));
-    Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateB");
-    scale_y = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
-    offset_y = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateOffset"));
-    Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateC");
-    scale_z = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
 
-    ROS_INFO_STREAM("scale_x = " << scale_x << " ; offset_x = " << offset_x);
-    ROS_INFO_STREAM("scale_y = " << scale_y << " ; offset_y = " << offset_y);
-    ROS_INFO_STREAM("scale_z = " << scale_z);
-  }
+  // Code get from ArenaSDK_Linux_x64/Examples/Arena/Cpp_Helios_MinMaxDepth/Cpp_Helios_MinMaxDepth.cpp
+  // Code to get the scales and offsets for x, y and z
+  Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateA");
+  scale_x = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
+  offset_x = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateOffset"));
+  Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateB");
+  scale_y = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
+  offset_y = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateOffset"));
+  Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateC");
+  scale_z = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
 
-  // Enable Scan 3d Spatial Filter
-  GenApi::CStringPtr pScan3dSpatialFilterEnable = pNodeMap->GetNode("Scan3dSpatialFilterEnable");
-  if (GenApi::IsWritable(pScan3dSpatialFilterEnable))
-  {
-    Arena::SetNodeValue<bool>(pNodeMap, "Scan3dSpatialFilterEnable", arena_camera_parameter_set_.scan_3d_spatial_filter_enable_);
-    bool check = Arena::GetNodeValue<bool>(pNodeMap, "Scan3dSpatialFilterEnable");
-    if(check)
-        ROS_INFO_STREAM("Scan3dSpatialFilter Enabled");
-    else
-        ROS_INFO_STREAM("Scan3dSpatialFilter Disabled");
-  }
+  ROS_INFO_STREAM("scale_x = " << scale_x << " ; offset_x = " << offset_x);
+  ROS_INFO_STREAM("scale_y = " << scale_y << " ; offset_y = " << offset_y);
+  ROS_INFO_STREAM("scale_z = " << scale_z);
 
   // End Added
 
@@ -1920,6 +1920,61 @@ bool ArenaCameraNode::setBrightnessCallback(camera_control_msgs::SetBrightness::
   res.reached_gain_value = currentGain();
   return true;
 }
+// Added
+
+bool setScan3dSpatialFilterEnableValue(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable_)
+{
+  try
+  {
+    GenApi::CBooleanPtr pScan3dSpatialFilterEnable = pDevice_->GetNodeMap()->GetNode("Scan3dSpatialFilterEnable");
+    if (GenApi::IsWritable(pScan3dSpatialFilterEnable))
+    {
+      bool scan_3d_spatial_filter_enable_to_set = target_scan_3d_spatial_filter_enable;
+      pScan3dSpatialFilterEnable->SetValue(scan_3d_spatial_filter_enable_to_set);
+      reached_scan_3d_spatial_filter_enable_ = pScan3dSpatialFilterEnable->GetValue();
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support Scan3dSpatialFilterEnable. Will keep the current settings");
+      reached_scan_3d_spatial_filter_enable_ = pScan3dSpatialFilterEnable->GetValue();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target Scan3dSpatialFilterEnable to " << std::to_string(target_scan_3d_spatial_filter_enable) << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setScan3dSpatialFilterEnable(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable_)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setScan3dSpatialFilterEnableValue(target_scan_3d_spatial_filter_enable, reached_scan_3d_spatial_filter_enable_))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setScan3dSpatialFilterEnableValue(target_scan_3d_spatial_filter_enable, reached_scan_3d_spatial_filter_enable_))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setScan3dSpatialFilterEnable(): Unable to set target target_scan_3d_spatial_filter_enable before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+// End Added
 
 void ArenaCameraNode::setupSamplingIndices(std::vector<std::size_t>& indices, std::size_t rows, std::size_t cols,
                                            int downsampling_factor)
