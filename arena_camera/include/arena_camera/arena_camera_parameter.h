@@ -291,6 +291,9 @@ public:
   /** Flag to indicates if we want to publish the PointCloud or not */
   bool publish_point_cloud_;
 
+  /** Flag to indicates if we want to enable to Scan 3D Spatial Filter*/
+  bool scan_3d_spatial_filter_enable_;
+
   // End Added
 
 protected:

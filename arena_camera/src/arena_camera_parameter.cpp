@@ -73,6 +73,11 @@ ArenaCameraParameter::ArenaCameraParameter()
   , inter_pkg_delay_(1000)
   , shutter_mode_(SM_DEFAULT)
   , auto_flash_(false)
+  // ##########################
+  // Added
+  // ##########################
+  , publish_point_cloud_(false)
+  , scan_3d_spatial_filter_enable_(false)
 {
 }
 
@@ -375,8 +380,19 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
 
   // Added
 
-  // Get publish_point_cloud
-  nh.param<bool>("publish_point_cloud", publish_point_cloud_, false);
+  // Get publish_point_cloud_
+  if (nh.hasParam("publish_point_cloud"))
+  {
+      nh.param<bool>("publish_point_cloud", publish_point_cloud_, false);
+      ROS_DEBUG_STREAM("Point Cloud will be published");
+  }
+
+  // Get scan_3d_spatial_filter_enable_
+  if (nh.hasParam("scan_3d_spatial_filter_enable"))
+  {
+    nh.param<bool>("scan_3d_spatial_filter_enable", scan_3d_spatial_filter_enable_, false);
+    ROS_DEBUG_STREAM("Scan 3D Spatial Filter will be enabled");
+  }
 
   // End Added
 

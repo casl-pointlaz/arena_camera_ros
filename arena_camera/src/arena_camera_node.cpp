@@ -657,6 +657,18 @@ bool ArenaCameraNode::startGrabbing()
     ROS_INFO_STREAM("scale_z = " << scale_z);
   }
 
+  // Enable Scan 3d Spatial Filter
+  GenApi::CStringPtr pScan3dSpatialFilterEnable = pNodeMap->GetNode("Scan3dSpatialFilterEnable");
+  if (GenApi::IsWritable(pScan3dSpatialFilterEnable))
+  {
+    Arena::SetNodeValue<bool>(pNodeMap, "Scan3dSpatialFilterEnable", arena_camera_parameter_set_.scan_3d_spatial_filter_enable_);
+    bool check = Arena::GetNodeValue<bool>(pNodeMap, "Scan3dSpatialFilterEnable");
+    if(check)
+        ROS_INFO_STREAM("Scan3dSpatialFilter Enabled");
+    else
+        ROS_INFO_STREAM("Scan3dSpatialFilter Disabled");
+  }
+
   // End Added
 
   if (!camera_info_manager_->setCameraName(

@@ -123,6 +123,14 @@ gain_auto: true
 
 # Added
 
-publish_point_cloud: true
+# If true and if image_encoding == "coord3d_abcy16", the data will be converted to point cloud
+# The point cloud will be published to /arena_camera_node/point_cloud when a node subscribe to the topic
+publish_point_cloud: true     # (bool)
+
+# If true, the Scan3dSpatialFilter feature will be enabled
+scan_3d_spatial_filter_enable: true             # (bool)
+
+# If true, the Scan3dFlyingPixelsRemoval feature will be enabled
+scan_3d_flying_pixels_removal_enable: true      # (bool)
 
 # End Added
