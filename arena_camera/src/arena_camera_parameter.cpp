@@ -78,6 +78,7 @@ ArenaCameraParameter::ArenaCameraParameter()
   // ##########################
   , publish_point_cloud_(false)
   , scan_3d_spatial_filter_enable_(false)
+  , scan_3d_flying_pixels_removal_enable_(false)
 {
 }
 
@@ -392,6 +393,13 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
   {
     nh.param<bool>("scan_3d_spatial_filter_enable", scan_3d_spatial_filter_enable_, false);
     ROS_DEBUG_STREAM("Scan 3D Spatial Filter will be enabled");
+  }
+
+  // Get scan_3d_flying_pixels_removal_enable_
+  if (nh.hasParam("scan_3d_flying_pixels_removal_enable"))
+  {
+    nh.param<bool>("scan_3d_flying_pixels_removal_enable", scan_3d_flying_pixels_removal_enable_, false);
+    ROS_DEBUG_STREAM("Scan 3D Flying Pixels Removal will be enabled");
   }
 
   // End Added

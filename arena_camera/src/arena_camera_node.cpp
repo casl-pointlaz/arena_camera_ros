@@ -607,6 +607,16 @@ bool ArenaCameraNode::startGrabbing()
         ROS_INFO_STREAM("Scan3dSpatialFilter Disabled");
     }
 
+    // Enable Scan 3d Spatial Filter
+    bool reached_scan_3d_flying_pixels_removal_enable;
+    if (setScan3dFlyingPixelsRemovalEnable(arena_camera_parameter_set_.scan_3d_flying_pixels_removal_enable_, reached_scan_3d_flying_pixels_removal_enable))
+    {
+      if(reached_scan_3d_flying_pixels_removal_enable)
+        ROS_INFO_STREAM("Scan3dFlyingPixelsRemoval Enabled");
+      else
+        ROS_INFO_STREAM("Scan3dFlyingPixelsRemoval Disabled");
+    }
+
     // End Added
 
     //
@@ -1922,7 +1932,7 @@ bool ArenaCameraNode::setBrightnessCallback(camera_control_msgs::SetBrightness::
 }
 // Added
 
-bool setScan3dSpatialFilterEnableValue(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable_)
+bool setScan3dSpatialFilterEnableValue(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable)
 {
   try
   {
@@ -1931,12 +1941,12 @@ bool setScan3dSpatialFilterEnableValue(const bool& target_scan_3d_spatial_filter
     {
       bool scan_3d_spatial_filter_enable_to_set = target_scan_3d_spatial_filter_enable;
       pScan3dSpatialFilterEnable->SetValue(scan_3d_spatial_filter_enable_to_set);
-      reached_scan_3d_spatial_filter_enable_ = pScan3dSpatialFilterEnable->GetValue();
+      reached_scan_3d_spatial_filter_enable = pScan3dSpatialFilterEnable->GetValue();
     }
     else
     {
       ROS_WARN_STREAM("Camera does not support Scan3dSpatialFilterEnable. Will keep the current settings");
-      reached_scan_3d_spatial_filter_enable_ = pScan3dSpatialFilterEnable->GetValue();
+      reached_scan_3d_spatial_filter_enable = pScan3dSpatialFilterEnable->GetValue();
     }
   }
 
@@ -1948,18 +1958,70 @@ bool setScan3dSpatialFilterEnableValue(const bool& target_scan_3d_spatial_filter
   return true;
 }
 
-bool ArenaCameraNode::setScan3dSpatialFilterEnable(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable_)
+bool ArenaCameraNode::setScan3dSpatialFilterEnable(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable)
 {
   boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
 
-  if (!setScan3dSpatialFilterEnableValue(target_scan_3d_spatial_filter_enable, reached_scan_3d_spatial_filter_enable_))
+  if (!setScan3dSpatialFilterEnableValue(target_scan_3d_spatial_filter_enable, reached_scan_3d_spatial_filter_enable))
   {
     // retry till timeout
     ros::Rate r(10.0);
     ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
     while (ros::ok())
     {
-      if (setScan3dSpatialFilterEnableValue(target_scan_3d_spatial_filter_enable, reached_scan_3d_spatial_filter_enable_))
+      if (setScan3dSpatialFilterEnableValue(target_scan_3d_spatial_filter_enable, reached_scan_3d_spatial_filter_enable))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setScan3dSpatialFilterEnable(): Unable to set target target_scan_3d_spatial_filter_enable before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setScan3dFlyingPixelsRemovalEnableValue(const bool& target_scan_3d_flying_pixels_removal_enable, bool& reached_scan_3d_flying_pixels_removal_enable)
+{
+  try
+  {
+    GenApi::CBooleanPtr pScan3dFlyingPixelsRemovalEnable = pDevice_->GetNodeMap()->GetNode("Scan3dFlyingPixelsRemovalEnable");
+    if (GenApi::IsWritable(pScan3dFlyingPixelsRemovalEnable))
+    {
+      bool scan_3d_flying_pixels_removal_enable_to_set = target_scan_3d_flying_pixels_removal_enable;
+      pScan3dFlyingPixelsRemovalEnable->SetValue(scan_3d_flying_pixels_removal_enable_to_set);
+        reached_scan_3d_flying_pixels_removal_enable = pScan3dFlyingPixelsRemovalEnable->GetValue();
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support Scan3dFlyingPixelsRemovalEnable. Will keep the current settings");
+        reached_scan_3d_flying_pixels_removal_enable = pScan3dFlyingPixelsRemovalEnable->GetValue();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target Scan3dFlyingPixelsRemovalEnable to " << std::to_string(target_scan_3d_flying_pixels_removal_enable) << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setScan3dFlyingPixelsRemovalEnable(const bool& target_scan_3d_flying_pixels_removal_enable, bool& reached_scan_3d_flying_pixels_removal_enable)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setScan3dFlyingPixelsRemovalEnableValue(target_scan_3d_flying_pixels_removal_enable, reached_scan_3d_flying_pixels_removal_enable))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setScan3dFlyingPixelsRemovalEnableValue(target_scan_3d_flying_pixels_removal_enable, reached_scan_3d_flying_pixels_removal_enable))
       {
         break;
       }

@@ -128,9 +128,9 @@ gain_auto: true
 publish_point_cloud: true     # (bool)
 
 # If true, the Scan3dSpatialFilter feature will be enabled
-scan_3d_spatial_filter_enable: true             # (bool)
+scan_3d_spatial_filter_enable: true             # (bool) Scan3dSpatialFilterEnable
 
 # If true, the Scan3dFlyingPixelsRemoval feature will be enabled
-scan_3d_flying_pixels_removal_enable: true      # (bool)
+  scan_3d_flying_pixels_removal_enable: true      # (bool) Scan3dFlyingPixelsRemovalEnable
 
 # End Added
