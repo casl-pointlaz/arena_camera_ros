@@ -617,6 +617,29 @@ bool ArenaCameraNode::startGrabbing()
         ROS_INFO_STREAM("Scan3dFlyingPixelsRemoval Disabled");
     }
 
+    // Display Parameters Info
+    GenApi::node_vector nodeList;
+    pDevice_->GetNodeMap()->GetNodes(nodeList);
+    if(arena_camera_parameter_set_.get_camera_parameter_info_ != "none")
+    {
+      ROS_INFO_STREAM("#################### PARAMETERS INFO ####################");
+      ROS_INFO_STREAM("get_camera_parameter_info_: " << arena_camera_parameter_set_.get_camera_parameter_info_);
+      ROS_INFO_STREAM("---------------------------------------------------------");
+      for(int i = 0 ; i < nodeList.size() ; i++)
+      {
+        if(arena_camera_parameter_set_.get_camera_parameter_info_ == "all" || nodeList[i]->GetName().find(arena_camera_parameter_set_.get_camera_parameter_info_.c_str()) != std::string::npos)
+        {
+          ROS_INFO_STREAM("Node " << i << ": " << nodeList[i]->GetName());
+          ROS_INFO_STREAM("\t - Description: " << nodeList[i]->GetDescription());
+          ROS_INFO_STREAM("\t - Interface: " << GetInterfaceName(nodeList[i]));
+          ROS_INFO_STREAM("\t - IsAvailable = " << IsAvailable(nodeList[i]));
+          ROS_INFO_STREAM("\t - IsReadable = " << IsReadable(nodeList[i]));
+          ROS_INFO_STREAM("\t - IsWritable = " << IsWritable(nodeList[i]));
+          ROS_INFO_STREAM("---------------------------------------------------------");
+        }
+      }
+    }
+
     // End Added
 
     //

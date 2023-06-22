@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+#include <ArenaApi.h>
+
 namespace arena_camera
 {
 enum SHUTTER_MODE
@@ -296,6 +298,9 @@ public:
 
   /** Flag to indicates if we want to enable the Scan 3D Flying Pixels removal */
   bool scan_3d_flying_pixels_removal_enable_;
+
+  /** Flag to indicates if we want to enable the Scan 3D Flying Pixels removal */
+  std::string get_camera_parameter_info_;
 
   // End Added
 

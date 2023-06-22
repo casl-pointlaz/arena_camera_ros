@@ -133,4 +133,44 @@ scan_3d_spatial_filter_enable: true             # (bool) Scan3dSpatialFilterEnab
 # If true, the Scan3dFlyingPixelsRemoval feature will be enabled
 scan_3d_flying_pixels_removal_enable: true      # (bool) Scan3dFlyingPixelsRemovalEnable
 
+# Defines the exposure time of the camera
+# exposure_time: 4000.0                           # (double ; [min ; max]) ExposureTime
+
+# Defines the exposure time of the camera
+# exposure_time_selector: "Exp1000Us"             # (double ; [min ; max]) ExposureTime
+
+# Defines the operating mode
+# operating_mode: "Distance1.25m"                 # OperatingMode
+
+# confidence_threshold_enable:                    # ConfidenceThresholdEnable
+
+# confidence_threshold_min:                       # ConfidenceThresholdMin
+
+# hdr_mode:                                       # HDRMode
+
+# trigger_selector:                               # TriggerSelector
+
+# trigger_mode:                                   # TriggerMode
+
+# trigger_software:                               # TriggerSoftware
+
+# trigger_source:                                 # TriggerSource
+
+# trigger_activation:                             # TriggerActivation
+
+# trigger_overlap:                                # TriggerOverlap
+
+# trigger_latency:                                # TriggerLatency
+
+# trigger_delay:                                  # TriggerDelay
+
+# trigger_armed:                                  # TriggerArmed
+
+# The node will display the info of every camera parameter containing get_camera_parameter_info in their names
+# For example, if get_camera_parameter_info == "Exposure", the node will echo the info of every camera parameter containing "Exposure" in their names
+# Set the parameter to "all" to get the info for all parameters
+# Set the parameter to "none" or comment it and to not get any info
+get_camera_parameter_info: "Exposure"             # (string)
+
+
 # End Added

@@ -79,6 +79,7 @@ ArenaCameraParameter::ArenaCameraParameter()
   , publish_point_cloud_(false)
   , scan_3d_spatial_filter_enable_(false)
   , scan_3d_flying_pixels_removal_enable_(false)
+  , get_camera_parameter_info_("none")
 {
 }
 
@@ -400,6 +401,18 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
   {
     nh.param<bool>("scan_3d_flying_pixels_removal_enable", scan_3d_flying_pixels_removal_enable_, false);
     ROS_DEBUG_STREAM("Scan 3D Flying Pixels Removal will be enabled");
+  }
+
+  // Get get_camera_parameter_info_
+  if (nh.hasParam("get_camera_parameter_info"))
+  {
+    nh.param<std::string>("get_camera_parameter_info", get_camera_parameter_info_, "none");
+    if(get_camera_parameter_info_ == "none")
+        ROS_DEBUG_STREAM("No parameters will have their info displayed");
+    else if(get_camera_parameter_info_ == "all")
+        ROS_DEBUG_STREAM("All parameters will have their info displayed");
+    else
+        ROS_DEBUG_STREAM("Parameters whose names contain '" << get_camera_parameter_info_ << "' will have their info displayed");
   }
 
   // End Added
