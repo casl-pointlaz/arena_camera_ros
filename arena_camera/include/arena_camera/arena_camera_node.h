@@ -323,6 +323,21 @@ protected:
    */
   bool setScan3dConfidenceThresholdEnable(const bool& target_scan_3d_confidence_threshold_enable, bool& reached_scan_3d_confidence_threshold_enable);
 
+  /**
+   * TODO
+   * @param target_scan_3d_confidence_threshold_min
+   * @param reached_scan_3d_confidence_threshold_min
+   * @return
+   */
+  bool setScan3dConfidenceThresholdMin(const int& target_scan_3d_confidence_threshold_min, int& reached_scan_3d_confidence_threshold_min);
+
+  /**
+   * TODO
+   * @param target_scan_3d_hdr_mode
+   * @param reached_scan_3d_hdr_mode
+   * @return
+   */
+  bool setScan3dHDRMode(const std::string& target_scan_3d_hdr_mode, std::string& reached_scan_3d_hdr_mode);
   // End Added
 
   /**

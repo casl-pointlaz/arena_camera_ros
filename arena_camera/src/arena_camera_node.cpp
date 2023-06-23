@@ -392,10 +392,38 @@ bool ArenaCameraNode::startGrabbing()
 
   try
   {
+    // Added
+
+    // Display Parameters Info
+    GenApi::node_vector nodeList;
+    pDevice_->GetNodeMap()->GetNodes(nodeList);
+    if(arena_camera_parameter_set_.get_camera_parameter_info_ != "none")
+    {
+      ROS_INFO_STREAM("#################### PARAMETERS INFO ####################");
+      ROS_INFO_STREAM("get_camera_parameter_info_: " << arena_camera_parameter_set_.get_camera_parameter_info_);
+      ROS_INFO_STREAM("---------------------------------------------------------");
+      for(int i = 0 ; i < nodeList.size() ; i++)
+      {
+        if(arena_camera_parameter_set_.get_camera_parameter_info_ == "all" || nodeList[i]->GetName().find(arena_camera_parameter_set_.get_camera_parameter_info_.c_str()) != std::string::npos)
+        {
+          ROS_INFO_STREAM("Node " << i << ": " << nodeList[i]->GetName());
+          ROS_INFO_STREAM("\t - Description: " << nodeList[i]->GetDescription());
+          ROS_INFO_STREAM("\t - Interface: " << GetInterfaceName(nodeList[i]));
+          ROS_INFO_STREAM("\t - IsAvailable = " << IsAvailable(nodeList[i]));
+          ROS_INFO_STREAM("\t - IsReadable = " << IsReadable(nodeList[i]));
+          ROS_INFO_STREAM("\t - IsWritable = " << IsWritable(nodeList[i]));
+          ROS_INFO_STREAM("---------------------------------------------------------");
+        }
+      }
+    }
+
+    ROS_INFO_STREAM("#################### SET PARAMETERS ####################");
+
+    // End Added
+
     //
     // Arena device prior streaming settings
     //
-    ROS_INFO_STREAM("#################### SET PARAMETERS ####################");
 
     //
     // PIXELFORMAT
@@ -598,29 +626,6 @@ bool ArenaCameraNode::startGrabbing()
 
     // Added
 
-    // Display Parameters Info
-    GenApi::node_vector nodeList;
-    pDevice_->GetNodeMap()->GetNodes(nodeList);
-    if(arena_camera_parameter_set_.get_camera_parameter_info_ != "none")
-    {
-      ROS_INFO_STREAM("#################### PARAMETERS INFO ####################");
-      ROS_INFO_STREAM("get_camera_parameter_info_: " << arena_camera_parameter_set_.get_camera_parameter_info_);
-      ROS_INFO_STREAM("---------------------------------------------------------");
-      for(int i = 0 ; i < nodeList.size() ; i++)
-      {
-        if(arena_camera_parameter_set_.get_camera_parameter_info_ == "all" || nodeList[i]->GetName().find(arena_camera_parameter_set_.get_camera_parameter_info_.c_str()) != std::string::npos)
-        {
-          ROS_INFO_STREAM("Node " << i << ": " << nodeList[i]->GetName());
-          ROS_INFO_STREAM("\t - Description: " << nodeList[i]->GetDescription());
-          ROS_INFO_STREAM("\t - Interface: " << GetInterfaceName(nodeList[i]));
-          ROS_INFO_STREAM("\t - IsAvailable = " << IsAvailable(nodeList[i]));
-          ROS_INFO_STREAM("\t - IsReadable = " << IsReadable(nodeList[i]));
-          ROS_INFO_STREAM("\t - IsWritable = " << IsWritable(nodeList[i]));
-          ROS_INFO_STREAM("---------------------------------------------------------");
-        }
-      }
-    }
-
     // Scan3dSpatialFilterEnable
     bool reached_scan_3d_spatial_filter_enable;
     if (setScan3dSpatialFilterEnable(arena_camera_parameter_set_.scan_3d_spatial_filter_enable_, reached_scan_3d_spatial_filter_enable))
@@ -655,6 +660,20 @@ bool ArenaCameraNode::startGrabbing()
       ROS_INFO_STREAM("Scan3dConfidenceThresholdEnable set to: " << reached_scan_3d_confidence_threshold_enable);
     else
       ROS_ERROR_STREAM("Error while setting Scan3dConfidenceThresholdEnable. Current Scan3dConfidenceThresholdEnable value is: " << reached_scan_3d_confidence_threshold_enable);
+
+    // Scan3dConfidenceThresholdMin
+    int reached_scan_3d_confidence_threshold_min;
+    if (setScan3dConfidenceThresholdMin(arena_camera_parameter_set_.scan_3d_confidence_threshold_min_, reached_scan_3d_confidence_threshold_min))
+      ROS_INFO_STREAM("Scan3dConfidenceThresholdMin set to: " << reached_scan_3d_confidence_threshold_min);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dConfidenceThresholdMin. Current Scan3dConfidenceThresholdMin value is: " << reached_scan_3d_confidence_threshold_min);
+
+    // Scan3dHDRMode
+    std::string reached_scan_3d_hdr_mode;
+    if (setScan3dHDRMode(arena_camera_parameter_set_.scan_3d_hdr_mode_, reached_scan_3d_hdr_mode))
+      ROS_INFO_STREAM("Scan3dHDRMode set to: " << reached_scan_3d_hdr_mode);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dHDRMode. Current Scan3dHDRMode value is: " << reached_scan_3d_hdr_mode);
 
     // End Added
 
@@ -2245,6 +2264,130 @@ bool ArenaCameraNode::setScan3dConfidenceThresholdEnable(const bool& target_scan
       if (ros::Time::now() > timeout)
       {
         ROS_ERROR_STREAM("Error in setScan3dConfidenceThresholdEnable(): Unable to set target Scan3dConfidenceThresholdEnable before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setScan3dConfidenceThresholdMinValue(const int& target_scan_3d_confidence_threshold_min, int& reached_scan_3d_confidence_threshold_min)
+{
+  try
+  {
+    GenApi::CIntegerPtr pScan3dConfidenceThresholdMin = pDevice_->GetNodeMap()->GetNode("Scan3dConfidenceThresholdMin");
+    if (GenApi::IsWritable(pScan3dConfidenceThresholdMin))
+    {
+      int scan_3d_confidence_threshold_min_to_set = target_scan_3d_confidence_threshold_min;
+      if (scan_3d_confidence_threshold_min_to_set < pScan3dConfidenceThresholdMin->GetMin())
+      {
+        ROS_WARN_STREAM("Desired Scan3dConfidenceThresholdMin '" << scan_3d_confidence_threshold_min_to_set << "' unreachable! Setting to lower limit: " << pScan3dConfidenceThresholdMin->GetMin());
+        scan_3d_confidence_threshold_min_to_set = pScan3dConfidenceThresholdMin->GetMin();
+      }
+      else if (scan_3d_confidence_threshold_min_to_set > pScan3dConfidenceThresholdMin->GetMax())
+      {
+        ROS_WARN_STREAM("Desired Scan3dConfidenceThresholdMin '" << scan_3d_confidence_threshold_min_to_set << "' unreachable! Setting to upper limit: " << pScan3dConfidenceThresholdMin->GetMax());
+        scan_3d_confidence_threshold_min_to_set = pScan3dConfidenceThresholdMin->GetMax();
+      }
+      pScan3dConfidenceThresholdMin->SetValue(scan_3d_confidence_threshold_min_to_set);
+      reached_scan_3d_confidence_threshold_min = pScan3dConfidenceThresholdMin->GetValue();
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support Scan3dConfidenceThresholdMin. Will keep the current settings");
+      reached_scan_3d_confidence_threshold_min = pScan3dConfidenceThresholdMin->GetValue();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target pScan3dConfidenceThresholdMin to " << std::to_string(target_scan_3d_confidence_threshold_min) << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setScan3dConfidenceThresholdMin(const int& target_scan_3d_confidence_threshold_min, int& reached_scan_3d_confidence_threshold_min)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setScan3dConfidenceThresholdMinValue(target_scan_3d_confidence_threshold_min, reached_scan_3d_confidence_threshold_min))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setScan3dConfidenceThresholdMinValue(target_scan_3d_confidence_threshold_min, reached_scan_3d_confidence_threshold_min))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setScan3dConfidenceThresholdMin(): Unable to set target Scan3dConfidenceThresholdMin before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setScan3dHDRModeValue(const std::string& target_scan_3d_hdr_mode, std::string& reached_scan_3d_hdr_mode)
+{
+  try
+  {
+    GenApi::CEnumerationPtr pScan3dHDRMode = pDevice_->GetNodeMap()->GetNode("Scan3dHDRMode");
+    if (GenApi::IsWritable(pScan3dHDRMode))
+    {
+      if(target_scan_3d_hdr_mode == "Off" || target_scan_3d_hdr_mode == "StandardHDR" ||
+      target_scan_3d_hdr_mode == "LowNoiseHDRX4" || target_scan_3d_hdr_mode == "LowNoiseHDRX8" ||
+      target_scan_3d_hdr_mode == "LowNoiseHDRX16" || target_scan_3d_hdr_mode == "LowNoiseHDRX32")
+      {
+        GenICam::gcstring scan_3d_hdr_mode_to_set = target_scan_3d_hdr_mode.c_str();
+        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dHDRMode", scan_3d_hdr_mode_to_set);
+        reached_scan_3d_hdr_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dHDRMode").c_str();
+      }
+      else
+      {
+        ROS_WARN_STREAM("Camera does not support the value '" << target_scan_3d_hdr_mode << "' for Scan3dHDRMode. Will keep the current settings");
+        reached_scan_3d_hdr_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dHDRMode").c_str();
+      }
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support Scan3dHDRMode. Will keep the current settings");
+      reached_scan_3d_hdr_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dHDRMode").c_str();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target Scan3dHDRMode to " << target_scan_3d_hdr_mode << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setScan3dHDRMode(const std::string& target_scan_3d_hdr_mode, std::string& reached_scan_3d_hdr_mode)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setScan3dHDRModeValue(target_scan_3d_hdr_mode, reached_scan_3d_hdr_mode))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setScan3dHDRModeValue(target_scan_3d_hdr_mode, reached_scan_3d_hdr_mode))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setScan3dHDRMode(): Unable to set target Scan3dHDRMode before timeout");
         return false;
       }
       r.sleep();
