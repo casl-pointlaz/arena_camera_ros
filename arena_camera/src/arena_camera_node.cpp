@@ -598,41 +598,6 @@ bool ArenaCameraNode::startGrabbing()
 
     // Added
 
-    // Scan3dSpatialFilterEnable
-    bool reached_scan_3d_spatial_filter_enable;
-    if (setScan3dSpatialFilterEnable(arena_camera_parameter_set_.scan_3d_spatial_filter_enable_, reached_scan_3d_spatial_filter_enable))
-      ROS_INFO_STREAM("Scan3dSpatialFilterEnable set to: " << reached_scan_3d_spatial_filter_enable);
-    else
-      ROS_ERROR_STREAM("Error while setting Scan3dSpatialFilterEnable. Current Scan3dSpatialFilterEnable value is: " << reached_scan_3d_spatial_filter_enable);
-
-    // Scan3dFlyingPixelsRemovalEnable
-    bool reached_scan_3d_flying_pixels_removal_enable;
-    if (setScan3dFlyingPixelsRemovalEnable(arena_camera_parameter_set_.scan_3d_flying_pixels_removal_enable_, reached_scan_3d_flying_pixels_removal_enable))
-      ROS_INFO_STREAM("Scan3dFlyingPixelsRemovalEnable set to: " << reached_scan_3d_flying_pixels_removal_enable);
-    else
-      ROS_ERROR_STREAM("Error while setting Scan3dFlyingPixelsRemovalEnable. Current Scan3dFlyingPixelsRemovalEnable value is: " << reached_scan_3d_flying_pixels_removal_enable);
-
-    // ExposureTimeSelector
-    std::string reached_exposure_time_selector;
-    if (setExposureTimeSelector(arena_camera_parameter_set_.exposure_time_selector_, reached_exposure_time_selector))
-      ROS_INFO_STREAM("ExposureTimeSelector set to: " << reached_exposure_time_selector);
-    else
-      ROS_ERROR_STREAM("Error while setting ExposureTimeSelector. Current ExposureTimeSelector value is: " << reached_exposure_time_selector);
-
-    // OperatingMode
-    std::string reached_operating_mode;
-    if (setOperatingMode(arena_camera_parameter_set_.operating_mode_, reached_operating_mode))
-      ROS_INFO_STREAM("OperatingMode set to: " << reached_operating_mode);
-    else
-      ROS_ERROR_STREAM("Error while setting OperatingMode. Current OperatingMode value is: " << reached_operating_mode);
-
-    // Scan3dConfidenceThresholdEnable
-    bool reached_scan_3d_confidence_threshold_enable;
-    if (setScan3dConfidenceThresholdEnable(arena_camera_parameter_set_.scan_3d_confidence_threshold_enable_, reached_scan_3d_confidence_threshold_enable))
-      ROS_INFO_STREAM("Scan3dConfidenceThresholdEnable set to: " << reached_scan_3d_confidence_threshold_enable);
-    else
-      ROS_ERROR_STREAM("Error while setting Scan3dConfidenceThresholdEnable. Current Scan3dConfidenceThresholdEnable value is: " << reached_scan_3d_confidence_threshold_enable);
-
     // Display Parameters Info
     GenApi::node_vector nodeList;
     pDevice_->GetNodeMap()->GetNodes(nodeList);
@@ -655,6 +620,41 @@ bool ArenaCameraNode::startGrabbing()
         }
       }
     }
+
+    // Scan3dSpatialFilterEnable
+    bool reached_scan_3d_spatial_filter_enable;
+    if (setScan3dSpatialFilterEnable(arena_camera_parameter_set_.scan_3d_spatial_filter_enable_, reached_scan_3d_spatial_filter_enable))
+      ROS_INFO_STREAM("Scan3dSpatialFilterEnable set to: " << reached_scan_3d_spatial_filter_enable);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dSpatialFilterEnable. Current Scan3dSpatialFilterEnable value is: " << reached_scan_3d_spatial_filter_enable);
+
+    // Scan3dFlyingPixelsRemovalEnable
+    bool reached_scan_3d_flying_pixels_removal_enable;
+    if (setScan3dFlyingPixelsRemovalEnable(arena_camera_parameter_set_.scan_3d_flying_pixels_removal_enable_, reached_scan_3d_flying_pixels_removal_enable))
+      ROS_INFO_STREAM("Scan3dFlyingPixelsRemovalEnable set to: " << reached_scan_3d_flying_pixels_removal_enable);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dFlyingPixelsRemovalEnable. Current Scan3dFlyingPixelsRemovalEnable value is: " << reached_scan_3d_flying_pixels_removal_enable);
+
+    // ExposureTimeSelector
+    std::string reached_exposure_time_selector;
+    if (setExposureTimeSelector(arena_camera_parameter_set_.exposure_time_selector_, reached_exposure_time_selector))
+      ROS_INFO_STREAM("ExposureTimeSelector set to: " << reached_exposure_time_selector);
+    else
+      ROS_ERROR_STREAM("Error while setting ExposureTimeSelector. Current ExposureTimeSelector value is: " << reached_exposure_time_selector);
+
+    // Scan3dOperatingMode
+    std::string reached_scan_3d_operating_mode;
+    if (setScan3dOperatingMode(arena_camera_parameter_set_.scan_3d_operating_mode_, reached_scan_3d_operating_mode))
+      ROS_INFO_STREAM("Scan3dOperatingMode set to: " << reached_scan_3d_operating_mode);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dOperatingMode. Current Scan3dOperatingMode value is: " << reached_scan_3d_operating_mode);
+
+    // Scan3dConfidenceThresholdEnable
+    bool reached_scan_3d_confidence_threshold_enable;
+    if (setScan3dConfidenceThresholdEnable(arena_camera_parameter_set_.scan_3d_confidence_threshold_enable_, reached_scan_3d_confidence_threshold_enable))
+      ROS_INFO_STREAM("Scan3dConfidenceThresholdEnable set to: " << reached_scan_3d_confidence_threshold_enable);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dConfidenceThresholdEnable. Current Scan3dConfidenceThresholdEnable value is: " << reached_scan_3d_confidence_threshold_enable);
 
     // End Added
 
@@ -2137,62 +2137,62 @@ bool ArenaCameraNode::setExposureTimeSelector(const std::string& target_exposure
   return true;
 }
 
-bool setOperatingModeValue(const std::string& target_operating_mode, std::string& reached_operating_mode)
+bool setScan3dOperatingModeValue(const std::string& target_scan_3d_operating_mode, std::string& reached_scan_3d_operating_mode)
 {
   try
   {
-    GenApi::CEnumerationPtr pOperatingMode = pDevice_->GetNodeMap()->GetNode("OperatingMode");
-    if (GenApi::IsWritable(pOperatingMode))
+    GenApi::CEnumerationPtr pScan3dOperatingMode = pDevice_->GetNodeMap()->GetNode("Scan3dOperatingMode");
+    if (GenApi::IsWritable(pScan3dOperatingMode))
     {
-      if(target_operating_mode == "Distance1250mmSingleFreq" || target_operating_mode == "Distance3000mmSingleFreq" ||
-      target_operating_mode == "Distance4000mmSingleFreq" || target_operating_mode == "Distance5000mmMultiFreq" ||
-      target_operating_mode == "Distance6000mmSingleFreq" || target_operating_mode == "Distance8300mmMultiFreq" ||
-      target_operating_mode == "HighSpeedDistance625mmSingleFreq" || target_operating_mode == "HighSpeedDistance1250mmSingleFreq" ||
-      target_operating_mode == "HighSpeedDistance2500mmSingleFreq")
+      if(target_scan_3d_operating_mode == "Distance1250mmSingleFreq" || target_scan_3d_operating_mode == "Distance3000mmSingleFreq" ||
+      target_scan_3d_operating_mode == "Distance4000mmSingleFreq" || target_scan_3d_operating_mode == "Distance5000mmMultiFreq" ||
+      target_scan_3d_operating_mode == "Distance6000mmSingleFreq" || target_scan_3d_operating_mode == "Distance8300mmMultiFreq" ||
+      target_scan_3d_operating_mode == "HighSpeedDistance625mmSingleFreq" || target_scan_3d_operating_mode == "HighSpeedDistance1250mmSingleFreq" ||
+      target_scan_3d_operating_mode == "HighSpeedDistance2500mmSingleFreq")
       {
-        GenICam::gcstring operating_mode_to_set = target_operating_mode.c_str();
-        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "OperatingMode", operating_mode_to_set);
-        reached_operating_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "OperatingMode").c_str();
+        GenICam::gcstring scan_3d_operating_mode_to_set = target_scan_3d_operating_mode.c_str();
+        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dOperatingMode", scan_3d_operating_mode_to_set);
+        reached_scan_3d_operating_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dOperatingMode").c_str();
       }
       else
       {
-        ROS_WARN_STREAM("Camera does not support the value '" << target_operating_mode << "' for OperatingMode. Will keep the current settings");
-        reached_operating_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "OperatingMode").c_str();
+        ROS_WARN_STREAM("Camera does not support the value '" << target_scan_3d_operating_mode << "' for Scan3dOperatingMode. Will keep the current settings");
+        reached_scan_3d_operating_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dOperatingMode").c_str();
       }
     }
     else
     {
-      ROS_WARN_STREAM("Camera does not support OperatingMode. Will keep the current settings");
-      reached_operating_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "OperatingMode").c_str();
+      ROS_WARN_STREAM("Camera does not support Scan3dOperatingMode. Will keep the current settings");
+      reached_scan_3d_operating_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dOperatingMode").c_str();
     }
   }
 
   catch (const GenICam::GenericException& e)
   {
-    ROS_ERROR_STREAM("An exception while setting target OperatingMode to " << target_operating_mode << " occurred: " << e.GetDescription());
+    ROS_ERROR_STREAM("An exception while setting target Scan3dOperatingMode to " << target_scan_3d_operating_mode << " occurred: " << e.GetDescription());
     return false;
   }
   return true;
 }
 
-bool ArenaCameraNode::setOperatingMode(const std::string& target_operating_mode, std::string& reached_operating_mode)
+bool ArenaCameraNode::setScan3dOperatingMode(const std::string& target_scan_3d_operating_mode, std::string& reached_scan_3d_operating_mode)
 {
   boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
 
-  if (!setOperatingModeValue(target_operating_mode, reached_operating_mode))
+  if (!setScan3dOperatingModeValue(target_scan_3d_operating_mode, reached_scan_3d_operating_mode))
   {
     // retry till timeout
     ros::Rate r(10.0);
     ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
     while (ros::ok())
     {
-      if (setOperatingModeValue(target_operating_mode, reached_operating_mode))
+      if (setScan3dOperatingModeValue(target_scan_3d_operating_mode, reached_scan_3d_operating_mode))
       {
         break;
       }
       if (ros::Time::now() > timeout)
       {
-        ROS_ERROR_STREAM("Error in setOperatingMode(): Unable to set target OperatingMode before timeout");
+        ROS_ERROR_STREAM("Error in setScan3dOperatingMode(): Unable to set target Scan3dOperatingMode before timeout");
         return false;
       }
       r.sleep();

@@ -309,11 +309,11 @@ protected:
 
   /**
    * TODO
-   * @param target_operating_mode
-   * @param reached_operating_mode
+   * @param target_scan_3d_operating_mode
+   * @param reached_scan_3d_operating_mode
    * @return
    */
-  bool setOperatingMode(const std::string& target_operating_mode, std::string& reached_operating_mode);
+  bool setScan3dOperatingMode(const std::string& target_scan_3d_operating_mode, std::string& reached_scan_3d_operating_mode);
 
   /**
    * TODO

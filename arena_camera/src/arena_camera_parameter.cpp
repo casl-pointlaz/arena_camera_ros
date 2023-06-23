@@ -80,7 +80,7 @@ ArenaCameraParameter::ArenaCameraParameter()
   , scan_3d_spatial_filter_enable_(false)
   , scan_3d_flying_pixels_removal_enable_(false)
   , exposure_time_selector_("Exp1000Us")
-  , operating_mode_("Distance1250mmSingleFreq")
+  , scan_3d_operating_mode_("Distance1250mmSingleFreq")
   , scan_3d_confidence_threshold_enable_(false)
   , scan_3d_confidence_threshold_min_(0)
   , scan_3d_hdr_mode_("Off")
@@ -420,11 +420,11 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
     ROS_DEBUG_STREAM("ExposureTimeSelector will be: " << exposure_time_selector_);
   }
 
-  // Get operating_mode_
-  if (nh.hasParam("operating_mode"))
+  // Get scan_3d_operating_mode_
+  if (nh.hasParam("scan_3d_operating_mode"))
   {
-    nh.param<std::string>("operating_mode", operating_mode_, "Distance1250mmSingleFreq");
-    ROS_DEBUG_STREAM("OperatingMode will be: " << operating_mode_);
+    nh.param<std::string>("scan_3d_operating_mode", scan_3d_operating_mode_, "Distance1250mmSingleFreq");
+    ROS_DEBUG_STREAM("Scan3dOperatingMode will be: " << scan_3d_operating_mode_);
   }
 
   // Get scan_3d_confidence_threshold_enable_

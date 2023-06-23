@@ -303,7 +303,7 @@ public:
   std::string exposure_time_selector_;
 
   /** Selects the time of flight operating mode. */
-  std::string operating_mode_;
+  std::string scan_3d_operating_mode_;
 
   /** Controls if the confidence threshold is enabled and applied to the output. */
   bool scan_3d_confidence_threshold_enable_;
