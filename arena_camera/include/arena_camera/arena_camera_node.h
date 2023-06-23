@@ -281,6 +281,8 @@ protected:
   */
   bool setGammaCallback(camera_control_msgs::SetGamma::Request& req, camera_control_msgs::SetGamma::Response& res);
 
+  // Added
+
   /**
   * Update the Scan3dSpatialFilterEnable flag to enable Scan 3d Spatial Filter
   * @param target_scan_3d_spatial_filter_enable the target value
@@ -296,6 +298,16 @@ protected:
   * @return true if the targeted value could be reached
   */
   bool setScan3dFlyingPixelsRemovalEnable(const bool& target_scan_3d_flying_pixels_removal_enable, bool& reached_scan_3d_flying_pixels_removal_enable);
+
+  /**
+   * TODO
+   * @param target_exposure_time_selector
+   * @param reached_target_exposure_time_selector
+   * @return
+   */
+  bool setExposureTimeSelector(const std::string& target_exposure_time_selector, std::string& reached_target_exposure_time_selector);
+
+  // End Added
 
   /**
   * Callback that puts the camera to sleep

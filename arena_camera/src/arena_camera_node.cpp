@@ -597,25 +597,26 @@ bool ArenaCameraNode::startGrabbing()
 
     // Added
 
-    // Enable Scan 3d Spatial Filter
+    // Scan3dSpatialFilterEnable
     bool reached_scan_3d_spatial_filter_enable;
     if (setScan3dSpatialFilterEnable(arena_camera_parameter_set_.scan_3d_spatial_filter_enable_, reached_scan_3d_spatial_filter_enable))
-    {
-      if(reached_scan_3d_spatial_filter_enable)
-        ROS_INFO_STREAM("Scan3dSpatialFilter Enabled");
-      else
-        ROS_INFO_STREAM("Scan3dSpatialFilter Disabled");
-    }
+      ROS_INFO_STREAM("Scan3dSpatialFilterEnable successfully set to: " << reached_scan_3d_spatial_filter_enable);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dSpatialFilterEnable. Current Scan3dSpatialFilterEnable value is: " << reached_scan_3d_spatial_filter_enable);
 
-    // Enable Scan 3d Spatial Filter
+    // Scan3dFlyingPixelsRemovalEnable
     bool reached_scan_3d_flying_pixels_removal_enable;
     if (setScan3dFlyingPixelsRemovalEnable(arena_camera_parameter_set_.scan_3d_flying_pixels_removal_enable_, reached_scan_3d_flying_pixels_removal_enable))
-    {
-      if(reached_scan_3d_flying_pixels_removal_enable)
-        ROS_INFO_STREAM("Scan3dFlyingPixelsRemoval Enabled");
-      else
-        ROS_INFO_STREAM("Scan3dFlyingPixelsRemoval Disabled");
-    }
+      ROS_INFO_STREAM("Scan3dFlyingPixelsRemovalEnable successfully set to: " << reached_scan_3d_flying_pixels_removal_enable);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dFlyingPixelsRemovalEnable. Current Scan3dFlyingPixelsRemovalEnable value is: " << reached_scan_3d_flying_pixels_removal_enable);
+
+    // ExposureTimeSelector
+    std::string reached_exposure_time_selector;
+    if (setExposureTimeSelector(arena_camera_parameter_set_.exposure_time_selector_, reached_exposure_time_selector))
+      ROS_INFO_STREAM("ExposureTimeSelector successfully set to: " << reached_exposure_time_selector);
+    else
+      ROS_ERROR_STREAM("Error while setting ExposureTimeSelector. Current ExposureTimeSelector value is: " << reached_exposure_time_selector);
 
     // Display Parameters Info
     GenApi::node_vector nodeList;
@@ -1954,6 +1955,7 @@ bool ArenaCameraNode::setBrightnessCallback(camera_control_msgs::SetBrightness::
   res.reached_gain_value = currentGain();
   return true;
 }
+
 // Added
 
 bool setScan3dSpatialFilterEnableValue(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable)
@@ -2017,12 +2019,12 @@ bool setScan3dFlyingPixelsRemovalEnableValue(const bool& target_scan_3d_flying_p
     {
       bool scan_3d_flying_pixels_removal_enable_to_set = target_scan_3d_flying_pixels_removal_enable;
       pScan3dFlyingPixelsRemovalEnable->SetValue(scan_3d_flying_pixels_removal_enable_to_set);
-        reached_scan_3d_flying_pixels_removal_enable = pScan3dFlyingPixelsRemovalEnable->GetValue();
+      reached_scan_3d_flying_pixels_removal_enable = pScan3dFlyingPixelsRemovalEnable->GetValue();
     }
     else
     {
       ROS_WARN_STREAM("Camera does not support Scan3dFlyingPixelsRemovalEnable. Will keep the current settings");
-        reached_scan_3d_flying_pixels_removal_enable = pScan3dFlyingPixelsRemovalEnable->GetValue();
+      reached_scan_3d_flying_pixels_removal_enable = pScan3dFlyingPixelsRemovalEnable->GetValue();
     }
   }
 
@@ -2046,6 +2048,66 @@ bool ArenaCameraNode::setScan3dFlyingPixelsRemovalEnable(const bool& target_scan
     while (ros::ok())
     {
       if (setScan3dFlyingPixelsRemovalEnableValue(target_scan_3d_flying_pixels_removal_enable, reached_scan_3d_flying_pixels_removal_enable))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setScan3dSpatialFilterEnable(): Unable to set target target_scan_3d_spatial_filter_enable before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setExposureTimeSelectorValue(const std::string& target_exposure_time_selector, std::string& reached_target_exposure_time_selector)
+{
+  try
+  {
+    GenApi::CEnumerationPtr pExposureTimeSelector = pDevice_->GetNodeMap()->GetNode("ExposureTimeSelector");
+    if (GenApi::IsWritable(pExposureTimeSelector))
+    {
+      if(target_exposure_time_selector == "Exp1000Us" || target_exposure_time_selector == "Exp250Us" || target_exposure_time_selector == "Exp62_5Us")
+      {
+        GenICam::gcstring exposure_time_selector_to_set = target_exposure_time_selector.c_str();
+        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "ExposureTimeSelector", exposure_time_selector_to_set);
+        reached_target_exposure_time_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "ExposureTimeSelector").c_str();
+      }
+      else
+      {
+        ROS_WARN_STREAM("Camera does not support the value '" << target_exposure_time_selector << "' for ExposureTimeSelector. Will keep the current settings");
+        reached_target_exposure_time_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "ExposureTimeSelector").c_str();
+      }
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support ExposureTimeSelector. Will keep the current settings");
+      reached_target_exposure_time_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "ExposureTimeSelector").c_str();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target ExposureTimeSelector to " << target_exposure_time_selector << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setExposureTimeSelector(const std::string& target_exposure_time_selector, std::string& reached_target_exposure_time_selector)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setExposureTimeSelectorValue(target_exposure_time_selector, reached_target_exposure_time_selector))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setExposureTimeSelectorValue(target_exposure_time_selector, reached_target_exposure_time_selector))
       {
         break;
       }
