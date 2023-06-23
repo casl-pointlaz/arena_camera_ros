@@ -698,6 +698,7 @@ bool ArenaCameraNode::startGrabbing()
   Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "Scan3dCoordinateSelector", "CoordinateC");
   scale_z = static_cast<float>(Arena::GetNodeValue<double>(pNodeMap, "Scan3dCoordinateScale"));
 
+  ROS_INFO_STREAM("#################### SCALES INFO ####################");
   ROS_INFO_STREAM("scale_x = " << scale_x << " ; offset_x = " << offset_x);
   ROS_INFO_STREAM("scale_y = " << scale_y << " ; offset_y = " << offset_y);
   ROS_INFO_STREAM("scale_z = " << scale_z);

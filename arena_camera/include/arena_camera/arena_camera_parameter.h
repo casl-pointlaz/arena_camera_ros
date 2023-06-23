@@ -293,11 +293,41 @@ public:
   /** Flag to indicates if we want to publish the PointCloud or not */
   bool publish_point_cloud_;
 
-  /** Flag to indicates if we want to enable the Scan 3D Spatial Filter */
+  /** Controls if spatial filtering is applied. */
   bool scan_3d_spatial_filter_enable_;
 
-  /** Flag to indicates if we want to enable the Scan 3D Flying Pixels removal */
+  /** Controls if the filter for removing flying pixels is applied. */
   bool scan_3d_flying_pixels_removal_enable_;
+
+  /** Selects the exposure time. */
+  std::string exposure_time_selector_;
+
+  /** Selects the time of flight operating mode. */
+  std::string operating_mode_;
+
+  /** Controls if the confidence threshold is enabled and applied to the output. */
+  bool scan_3d_confidence_threshold_enable_;
+
+  /** Controls the minimum threshold value that determines whether or not the depth of a pixel is reliable. */
+  int scan_3d_confidence_threshold_min_;
+
+  /** Specifies high dynamic range (HDR) mode. */
+  std::string scan_3d_hdr_mode_;
+
+  /** This node selects the specific trigger type to configure. */
+  std::string trigger_selector_;
+
+  /** Controls the On/Off status of the current trigger. */
+  std::string trigger_mode_;
+
+  /** This node specifies the source of the trigger. It can be a software internal signal of a physical input hardware signal. */
+  std::string trigger_source_;
+
+  /** This node specifies the state in which trigger is activated. */
+  std::string trigger_activation_;
+
+  /** Specifies the delay in microseconds (us) to apply after the trigger reception before activating it. */
+  float trigger_delay_;
 
   /** Flag to indicates if we want to enable the Scan 3D Flying Pixels removal */
   std::string get_camera_parameter_info_;

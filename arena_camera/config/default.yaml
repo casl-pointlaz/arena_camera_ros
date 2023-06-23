@@ -123,48 +123,87 @@ gain_auto: true
 
 # Added
 
-# If true and if image_encoding == "coord3d_abcy16", the data will be converted to point cloud
-# The point cloud will be published to /arena_camera_node/point_cloud when a node subscribe to the topic
-publish_point_cloud: true     # (bool)
+# If true and if image_encoding == "coord3d_abcy16", the data will be converted to point cloud.
+# The point cloud will be published to /arena_camera_node/point_cloud when a node subscribe to the topic.
+publish_point_cloud: true                       # (bool)
 
-# If true, the Scan3dSpatialFilter feature will be enabled
+# Controls if spatial filtering is applied.
 scan_3d_spatial_filter_enable: true             # (bool) Scan3dSpatialFilterEnable
 
-# If true, the Scan3dFlyingPixelsRemoval feature will be enabled
+# Controls if the filter for removing flying pixels is applied.
 scan_3d_flying_pixels_removal_enable: true      # (bool) Scan3dFlyingPixelsRemovalEnable
 
-# Defines the exposure time of the camera
-# exposure_time: 4000.0                           # (double ; [min ; max]) ExposureTime
+# Selects the exposure time. It uses an enumeration string format.
+# Can only be:
+#   "Exp1000Us": Exposure time 1000 micro seconds.
+#   "Exp250Us": Exposure time 250 micro seconds.
+#   "Exp62_5Us": Exposure time 62.5 micro seconds.
+exposure_time_selector: "Exp1000Us"             # (enum string) ExposureTimeSelector
 
-# Defines the exposure time of the camera
-# exposure_time_selector: "Exp1000Us"             # (double ; [min ; max]) ExposureTime
+# Selects the time of flight operating mode. It uses an enumeration string format.
+# Can only be:
+#   "Distance1250mmSingleFreq": Max working distance is 1.25 meters, using one modulation frequency.
+#   "Distance3000mmSingleFreq": Max working distance is 3.0 meters, using one modulation frequency.
+#   "Distance4000mmSingleFreq": Max working distance is 4.0 meters, using one modulation frequency.
+#   "Distance5000mmMultiFreq": Max working distance is 5.0 meters, using two modulation frequencies.
+#   "Distance6000mmSingleFreq": Max working distance is 6.0 meters, using one modulation frequency.
+#   "Distance8300mmMultiFreq": Max working distance is 8.3 meters, using two modulation frequencies.
+#   "HighSpeedDistance625mmSingleFreq": Max working distance is 0.625 meters, using one modulation frequency.
+#   "HighSpeedDistance1250mmSingleFreq": Max working distance is 1.25 meters, using one modulation frequency.
+#   "HighSpeedDistance2500mmSingleFreq": Max working distance is 2.5 meters, using one modulation frequency.
+operating_mode: "Distance1250mmSingleFreq"      # (enum string) OperatingMode
 
-# Defines the operating mode
-# operating_mode: "Distance1.25m"                 # OperatingMode
+# Controls if the confidence threshold is enabled and applied to the output.
+scan_3d_confidence_threshold_enable: true       # (bool) ConfidenceThresholdEnable
 
-# confidence_threshold_enable:                    # ConfidenceThresholdEnable
+# Controls the minimum threshold value that determines whether or not the depth of a pixel is reliable.
+# TODO: Get min and max values
+scan_3d_confidence_threshold_min: 5000          # (int) Scan3dConfidenceThresholdMin
 
-# confidence_threshold_min:                       # ConfidenceThresholdMin
+# Specifies high dynamic range (HDR) mode. It uses an enumeration string format.
+# Can only be:
+#   "Off": None
+#   "StandardHDR": None
+#   "LowNoiseHDRX4": None
+#   "LowNoiseHDRX8": None
+#   "LowNoiseHDRX16": None
+#   "LowNoiseHDRX32": None
+scan_3d_hdr_mode: "Off"                         # (enum string) Scan3dHDRMode
 
-# hdr_mode:                                       # HDRMode
+# This node selects the specific trigger type to configure. It uses an enumeration string format.
+# Can only be:
+#   "AcquisitionStart": Trigger signal starts the Acquisition of one or many frames according to AcquisitionMode.
+#   "FrameStart": Trigger signal starts the capture of one frame.
+#   "FrameBurstStart": Trigger signal starts the capture of the bursts of frames in an acquisition.
+#   "ExposureActive": Trigger signal pulse width determines the length of the ExposureTime.
+#   "LineStart": Selects a trigger starting the capture of one Line of a Frame.
+#   "FrameBurstActive": Trigger signal will capture burst of frames when source is high.
+trigger_selector: "FrameStart"                  # (enum string) TriggerSelector
 
-# trigger_selector:                               # TriggerSelector
+# Controls the On/Off status of the current trigger. It uses an enumeration string format.
+# Can only be:
+#   "Off": Disable current trigger.
+#   "On": Enable current trigger.
+trigger_mode: "Off"                             # (enum string) TriggerMode
 
-# trigger_mode:                                   # TriggerMode
+# This node specifies the source of the trigger. It can be a software internal signal of a physical input hardware signal. It uses an enumeration string format.
+# Can only be:
+#   "Software": The trigger will be generated from the TriggerSoftware command.
+#   "Line0": None
+#   "Line1": None
+#   "Line2": None
+#   "Line3": None
+#   "Action0": None
+trigger_source: "Software"                        # (enum string) TriggerSource
 
-# trigger_software:                               # TriggerSoftware
+# This node specifies the state in which trigger is activated. It uses an enumeration string format.
+# Can only be:
+#   "RisingEdge": Trigger is activated on the rising edge of the signal.
+trigger_activation: "RisingEdge"                  # (enum string) TriggerActivation
 
-# trigger_source:                                 # TriggerSource
-
-# trigger_activation:                             # TriggerActivation
-
-# trigger_overlap:                                # TriggerOverlap
-
-# trigger_latency:                                # TriggerLatency
-
-# trigger_delay:                                  # TriggerDelay
-
-# trigger_armed:                                  # TriggerArmed
+# Specifies the delay in microseconds (us) to apply after the trigger reception before activating it.
+# TODO: Get min and max values
+trigger_delay: 0.0                                # (float) TriggerDelay
 
 # The node will display the info of every camera parameter containing get_camera_parameter_info in their names
 # For example, if get_camera_parameter_info == "Exposure", the node will echo the info of every camera parameter containing "Exposure" in their names

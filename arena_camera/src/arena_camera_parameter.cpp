@@ -79,6 +79,16 @@ ArenaCameraParameter::ArenaCameraParameter()
   , publish_point_cloud_(false)
   , scan_3d_spatial_filter_enable_(false)
   , scan_3d_flying_pixels_removal_enable_(false)
+  , exposure_time_selector_("Exp1000Us")
+  , operating_mode_("Distance1250mmSingleFreq")
+  , scan_3d_confidence_threshold_enable_(false)
+  , scan_3d_confidence_threshold_min_(0)
+  , scan_3d_hdr_mode_("Off")
+  , trigger_selector_("FrameStart")
+  , trigger_mode_("Off")
+  , trigger_source_("Software")
+  , trigger_activation_("RisingEdge")
+  , trigger_delay_(0.0)
   , get_camera_parameter_info_("none")
 {
 }
@@ -393,7 +403,84 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
   if (nh.hasParam("scan_3d_spatial_filter_enable"))
   {
     nh.param<bool>("scan_3d_spatial_filter_enable", scan_3d_spatial_filter_enable_, false);
-    ROS_DEBUG_STREAM("Scan 3D Spatial Filter will be enabled");
+    ROS_DEBUG_STREAM("Scan3dSpatialFilterEnable will be: " << scan_3d_spatial_filter_enable_);
+  }
+
+  // Get scan_3d_flying_pixels_removal_enable_
+  if (nh.hasParam("scan_3d_flying_pixels_removal_enable"))
+  {
+    nh.param<bool>("scan_3d_flying_pixels_removal_enable", scan_3d_flying_pixels_removal_enable_, false);
+    ROS_DEBUG_STREAM("Scan3dFlyingPixelsRemovalEnable will be: " << scan_3d_flying_pixels_removal_enable_);
+  }
+
+  // Get exposure_time_selector_
+  if (nh.hasParam("exposure_time_selector"))
+  {
+    nh.param<std::string>("exposure_time_selector", exposure_time_selector_, "Exp1000Us");
+    ROS_DEBUG_STREAM("ExposureTimeSelector will be: " << exposure_time_selector_);
+  }
+
+  // Get operating_mode_
+  if (nh.hasParam("operating_mode"))
+  {
+    nh.param<std::string>("operating_mode", operating_mode_, "Distance1250mmSingleFreq");
+    ROS_DEBUG_STREAM("OperatingMode will be: " << operating_mode_);
+  }
+
+  // Get scan_3d_confidence_threshold_enable_
+  if (nh.hasParam("scan_3d_confidence_threshold_enable"))
+  {
+    nh.param<bool>("scan_3d_confidence_threshold_enable", scan_3d_confidence_threshold_enable_, false);
+    ROS_DEBUG_STREAM("Scan3dConfidenceThresholdEnable will be: " << scan_3d_confidence_threshold_enable_);
+  }
+
+  // Get scan_3d_confidence_threshold_min_
+  if (nh.hasParam("scan_3d_confidence_threshold_min"))
+  {
+    nh.param<int>("scan_3d_confidence_threshold_min", scan_3d_confidence_threshold_min_, 0);
+    ROS_DEBUG_STREAM("Scan3dConfidenceThresholdEnable will be: " << scan_3d_confidence_threshold_min_);
+  }
+
+  // Get scan_3d_hdr_mode_
+  if (nh.hasParam("scan_3d_hdr_mode"))
+  {
+    nh.param<std::string>("scan_3d_hdr_mode", scan_3d_hdr_mode_, "Off");
+    ROS_DEBUG_STREAM("Scan3HDRMode will be: " << scan_3d_hdr_mode_);
+  }
+
+  // Get trigger_selector_
+  if (nh.hasParam("trigger_selector"))
+  {
+    nh.param<std::string>("trigger_selector", trigger_selector_, "FrameStart");
+    ROS_DEBUG_STREAM("TriggerSelector will be: " << trigger_selector_);
+  }
+
+  // Get trigger_mode_
+  if (nh.hasParam("trigger_mode"))
+  {
+    nh.param<std::string>("trigger_mode", trigger_mode_, "Off");
+    ROS_DEBUG_STREAM("TriggerMode will be: " << trigger_mode_);
+  }
+
+  // Get trigger_source_
+  if (nh.hasParam("trigger_source"))
+  {
+    nh.param<std::string>("trigger_source", trigger_source_, "Software");
+    ROS_DEBUG_STREAM("TriggerSource will be: " << trigger_source_);
+  }
+
+  // Get trigger_activation_
+  if (nh.hasParam("trigger_activation"))
+  {
+    nh.param<std::string>("trigger_activation", trigger_activation_, "RisingEdge");
+    ROS_DEBUG_STREAM("TriggerActivation will be: " << trigger_activation_);
+  }
+
+  // Get trigger_delay_
+  if (nh.hasParam("trigger_delay"))
+  {
+    nh.param<float>("trigger_delay", trigger_delay_, 0.0);
+    ROS_DEBUG_STREAM("TriggerDelay will be: " << trigger_delay_);
   }
 
   // Get scan_3d_flying_pixels_removal_enable_
