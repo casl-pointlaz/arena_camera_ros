@@ -302,10 +302,26 @@ protected:
   /**
    * TODO
    * @param target_exposure_time_selector
-   * @param reached_target_exposure_time_selector
+   * @param reached_exposure_time_selector
    * @return
    */
-  bool setExposureTimeSelector(const std::string& target_exposure_time_selector, std::string& reached_target_exposure_time_selector);
+  bool setExposureTimeSelector(const std::string& target_exposure_time_selector, std::string& reached_exposure_time_selector);
+
+  /**
+   * TODO
+   * @param target_operating_mode
+   * @param reached_operating_mode
+   * @return
+   */
+  bool setOperatingMode(const std::string& target_operating_mode, std::string& reached_operating_mode);
+
+  /**
+   * TODO
+   * @param target_scan_3d_confidence_threshold_enable
+   * @param reached_scan_3d_confidence_threshold_enable
+   * @return
+   */
+  bool setScan3dConfidenceThresholdEnable(const bool& target_scan_3d_confidence_threshold_enable, bool& reached_scan_3d_confidence_threshold_enable);
 
   // End Added
 

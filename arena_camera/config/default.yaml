@@ -154,7 +154,7 @@ exposure_time_selector: "Exp1000Us"             # (enum string) ExposureTimeSele
 operating_mode: "Distance1250mmSingleFreq"      # (enum string) OperatingMode
 
 # Controls if the confidence threshold is enabled and applied to the output.
-scan_3d_confidence_threshold_enable: true       # (bool) ConfidenceThresholdEnable
+scan_3d_confidence_threshold_enable: true       # (bool) Scan3dConfidenceThresholdEnable
 
 # Controls the minimum threshold value that determines whether or not the depth of a pixel is reliable.
 # TODO: Get min and max values
