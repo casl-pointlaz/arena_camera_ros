@@ -90,6 +90,7 @@ ArenaCameraParameter::ArenaCameraParameter()
   , trigger_activation_("RisingEdge")
   , trigger_delay_(0.0)
   , get_camera_parameter_info_("none")
+  , echo_elapsed_time_(false)
 {
 }
 
@@ -396,7 +397,7 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
   if (nh.hasParam("publish_point_cloud"))
   {
       nh.param<bool>("publish_point_cloud", publish_point_cloud_, false);
-      ROS_DEBUG_STREAM("Point Cloud will be published");
+      ROS_DEBUG_STREAM("publish_point_cloud will be: " << publish_point_cloud_);
   }
 
   // Get scan_3d_spatial_filter_enable_
@@ -483,13 +484,6 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
     ROS_DEBUG_STREAM("TriggerDelay will be: " << trigger_delay_);
   }
 
-  // Get scan_3d_flying_pixels_removal_enable_
-  if (nh.hasParam("scan_3d_flying_pixels_removal_enable"))
-  {
-    nh.param<bool>("scan_3d_flying_pixels_removal_enable", scan_3d_flying_pixels_removal_enable_, false);
-    ROS_DEBUG_STREAM("Scan 3D Flying Pixels Removal will be enabled");
-  }
-
   // Get get_camera_parameter_info_
   if (nh.hasParam("get_camera_parameter_info"))
   {
@@ -500,6 +494,12 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
         ROS_DEBUG_STREAM("All parameters will have their info displayed");
     else
         ROS_DEBUG_STREAM("Parameters whose names contain '" << get_camera_parameter_info_ << "' will have their info displayed");
+  }
+
+  if (nh.hasParam("echo_elapsed_time"))
+  {
+    nh.param<bool>("echo_elapsed_time", echo_elapsed_time_, false);
+    ROS_DEBUG_STREAM("echo_elapsed_time will be: " << echo_elapsed_time_);
   }
 
   // End Added

@@ -910,7 +910,8 @@ void ArenaCameraNode::spin()
       ROS_INFO_ONCE("Number subscribers rect received");
     }
   }
-  ROS_INFO_STREAM("Elapsed time = " << ros::Time::now().toSec() - start_time.toSec());
+  if(arena_camera_parameter_set_.echo_elapsed_time_)
+    ROS_INFO_STREAM("Elapsed time = " << ros::Time::now().toSec() - start_time.toSec());
 }
 
 bool ArenaCameraNode::grabImage()

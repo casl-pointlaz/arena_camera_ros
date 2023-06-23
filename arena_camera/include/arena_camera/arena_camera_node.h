@@ -284,7 +284,7 @@ protected:
   // Added
 
   /**
-  * Update the Scan3dSpatialFilterEnable flag to enable Scan 3d Spatial Filter
+  * Update the Scan3dSpatialFilterEnable value
   * @param target_scan_3d_spatial_filter_enable the target value
   * @param reached_scan_3d_spatial_filter_enable_ the value that could be reached
   * @return true if the targeted value could be reached
@@ -292,7 +292,7 @@ protected:
   bool setScan3dSpatialFilterEnable(const bool& target_scan_3d_spatial_filter_enable, bool& reached_scan_3d_spatial_filter_enable);
 
   /**
-  * Update the Scan3dFlyingPixelsRemovalEnable flag to enable Scan 3d Flying Pixels Removal
+  * Update the Scan3dFlyingPixelsRemovalEnable value
   * @param target_scan_3d_flying_pixels_removal_enable the target value
   * @param reached_scan_3d_flying_pixels_removal_enable the value that could be reached
   * @return true if the targeted value could be reached
@@ -300,7 +300,7 @@ protected:
   bool setScan3dFlyingPixelsRemovalEnable(const bool& target_scan_3d_flying_pixels_removal_enable, bool& reached_scan_3d_flying_pixels_removal_enable);
 
   /**
-   * TODO
+   * Update the ExposureTimeSelector value
    * @param target_exposure_time_selector
    * @param reached_exposure_time_selector
    * @return
@@ -308,7 +308,7 @@ protected:
   bool setExposureTimeSelector(const std::string& target_exposure_time_selector, std::string& reached_exposure_time_selector);
 
   /**
-   * TODO
+   * Update the Scan3dOperatingMode value
    * @param target_scan_3d_operating_mode
    * @param reached_scan_3d_operating_mode
    * @return
@@ -316,7 +316,7 @@ protected:
   bool setScan3dOperatingMode(const std::string& target_scan_3d_operating_mode, std::string& reached_scan_3d_operating_mode);
 
   /**
-   * TODO
+   * Update the Scan3dConfidenceThresholdEnable value
    * @param target_scan_3d_confidence_threshold_enable
    * @param reached_scan_3d_confidence_threshold_enable
    * @return
@@ -324,7 +324,7 @@ protected:
   bool setScan3dConfidenceThresholdEnable(const bool& target_scan_3d_confidence_threshold_enable, bool& reached_scan_3d_confidence_threshold_enable);
 
   /**
-   * TODO
+   * Update the Scan3dConfidenceThresholdMin value
    * @param target_scan_3d_confidence_threshold_min
    * @param reached_scan_3d_confidence_threshold_min
    * @return
@@ -332,12 +332,13 @@ protected:
   bool setScan3dConfidenceThresholdMin(const int& target_scan_3d_confidence_threshold_min, int& reached_scan_3d_confidence_threshold_min);
 
   /**
-   * TODO
+   * Update the Scan3dHDRMode value
    * @param target_scan_3d_hdr_mode
    * @param reached_scan_3d_hdr_mode
    * @return
    */
   bool setScan3dHDRMode(const std::string& target_scan_3d_hdr_mode, std::string& reached_scan_3d_hdr_mode);
+
   // End Added
 
   /**

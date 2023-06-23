@@ -157,7 +157,8 @@ scan_3d_operating_mode: "Distance1250mmSingleFreq"      # (enum string) Scan3dOp
 scan_3d_confidence_threshold_enable: true       # (bool) Scan3dConfidenceThresholdEnable
 
 # Controls the minimum threshold value that determines whether or not the depth of a pixel is reliable.
-# TODO: Get min and max values
+#   Min value: 0
+#   Max value: 65535
 scan_3d_confidence_threshold_min: 5000          # (int) Scan3dConfidenceThresholdMin
 
 # Specifies high dynamic range (HDR) mode. It uses an enumeration string format.
@@ -210,6 +211,9 @@ trigger_delay: 0.0                                # (float) TriggerDelay
 # Set the parameter to "all" to get the info for all parameters
 # Set the parameter to "none" or comment it and to not get any info
 get_camera_parameter_info: "Exposure"             # (string)
+
+# Controls the echo of the elapsed time to grab and publish an image.
+echo_elapsed_time: false
 
 
 # End Added

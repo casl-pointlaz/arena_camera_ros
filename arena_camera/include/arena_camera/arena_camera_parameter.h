@@ -329,8 +329,11 @@ public:
   /** Specifies the delay in microseconds (us) to apply after the trigger reception before activating it. */
   float trigger_delay_;
 
-  /** Flag to indicates if we want to enable the Scan 3D Flying Pixels removal */
+  /** Info from parameters whose names contain 'get_camera_parameter_info_' value will be displayed. */
   std::string get_camera_parameter_info_;
+
+  /** Controls the echo of the elapsed time to grab and publish an image. */
+  bool echo_elapsed_time_;
 
   // End Added
 
