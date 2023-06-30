@@ -675,6 +675,41 @@ bool ArenaCameraNode::startGrabbing()
     else
       ROS_ERROR_STREAM("Error while setting Scan3dHDRMode. Current Scan3dHDRMode value is: " << reached_scan_3d_hdr_mode);
 
+    // TriggerSelector
+    std::string reached_trigger_selector;
+    if (setTriggerSelector(arena_camera_parameter_set_.trigger_selector_, reached_trigger_selector))
+      ROS_INFO_STREAM("TriggerSelector set to: " << reached_trigger_selector);
+    else
+      ROS_ERROR_STREAM("Error while setting TriggerSelector. Current TriggerSelector value is: " << reached_trigger_selector);
+
+    // TriggerMode
+    std::string reached_trigger_mode;
+    if (setTriggerMode(arena_camera_parameter_set_.trigger_mode_, reached_trigger_mode))
+      ROS_INFO_STREAM("TriggerMode set to: " << reached_trigger_mode);
+    else
+      ROS_ERROR_STREAM("Error while setting TriggerMode. Current TriggerMode value is: " << reached_trigger_mode);
+
+    // TriggerSource
+    std::string reached_trigger_source;
+    if (setTriggerSource(arena_camera_parameter_set_.trigger_source_, reached_trigger_source))
+      ROS_INFO_STREAM("TriggerSource set to: " << reached_trigger_source);
+    else
+      ROS_ERROR_STREAM("Error while setting TriggerSource. Current TriggerSource value is: " << reached_trigger_source);
+
+    // TriggerActivation
+    std::string reached_trigger_activation;
+    if (setTriggerActivation(arena_camera_parameter_set_.trigger_activation_, reached_trigger_activation))
+      ROS_INFO_STREAM("TriggerActivation set to: " << reached_trigger_activation);
+    else
+      ROS_ERROR_STREAM("Error while setting TriggerActivation. Current TriggerActivation value is: " << reached_trigger_activation);
+
+    // TriggerDelay
+    float reached_trigger_delay;
+    if (setTriggerDelay(arena_camera_parameter_set_.trigger_delay_, reached_trigger_delay))
+      ROS_INFO_STREAM("TriggerDelay set to: " << reached_trigger_delay);
+    else
+      ROS_ERROR_STREAM("Error while setting TriggerDelay. Current TriggerDelay value is: " << reached_trigger_delay);
+
     // End Added
 
     //
@@ -2389,6 +2424,311 @@ bool ArenaCameraNode::setScan3dHDRMode(const std::string& target_scan_3d_hdr_mod
       if (ros::Time::now() > timeout)
       {
         ROS_ERROR_STREAM("Error in setScan3dHDRMode(): Unable to set target Scan3dHDRMode before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setTriggerSelectorValue(const std::string& target_trigger_selector, std::string& reached_trigger_selector)
+{
+  try
+  {
+    GenApi::CEnumerationPtr pTriggerSelector = pDevice_->GetNodeMap()->GetNode("TriggerSelector");
+    if (GenApi::IsWritable(pTriggerSelector))
+    {
+      if(target_trigger_selector == "AcquisitionStart" || target_trigger_selector == "FrameStart" ||
+      target_trigger_selector == "FrameBurstStart" || target_trigger_selector == "ExposureActive" ||
+      target_trigger_selector == "LineStart" || target_trigger_selector == "FrameBurstActive")
+      {
+        GenICam::gcstring trigger_selector_to_set = target_trigger_selector.c_str();
+        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerSelector", trigger_selector_to_set);
+          reached_trigger_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerSelector").c_str();
+      }
+      else
+      {
+        ROS_WARN_STREAM("Camera does not support the value '" << target_trigger_selector << "' for TriggerSelector. Will keep the current settings");
+        reached_trigger_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerSelector").c_str();
+      }
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support TriggerSelector. Will keep the current settings");
+      reached_trigger_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerSelector").c_str();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target TriggerSelector to " << target_trigger_selector << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setTriggerSelector(const std::string& target_trigger_selector, std::string& reached_trigger_selector)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setTriggerSelectorValue(target_trigger_selector, reached_trigger_selector))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setTriggerSelectorValue(target_trigger_selector, reached_trigger_selector))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setTriggerSelector(): Unable to set target TriggerSelector before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setTriggerModeValue(const std::string& target_trigger_mode, std::string& reached_trigger_mode)
+{
+  try
+  {
+    GenApi::CEnumerationPtr pTriggerMode = pDevice_->GetNodeMap()->GetNode("TriggerMode");
+    if (GenApi::IsWritable(pTriggerMode))
+    {
+      if(target_trigger_mode == "Off" || target_trigger_mode == "On")
+      {
+        GenICam::gcstring trigger_mode_to_set = target_trigger_mode.c_str();
+        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerMode", trigger_mode_to_set);
+        reached_trigger_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerMode").c_str();
+      }
+      else
+      {
+        ROS_WARN_STREAM("Camera does not support the value '" << target_trigger_mode << "' for TriggerMode. Will keep the current settings");
+        reached_trigger_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerMode").c_str();
+      }
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support TriggerMode. Will keep the current settings");
+      reached_trigger_mode = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerMode").c_str();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target TriggerMode to " << target_trigger_mode << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setTriggerMode(const std::string& target_trigger_mode, std::string& reached_trigger_mode)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setTriggerModeValue(target_trigger_mode, reached_trigger_mode))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setTriggerModeValue(target_trigger_mode, reached_trigger_mode))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setTriggerMode(): Unable to set target TriggerMode before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setTriggerSourceValue(const std::string& target_trigger_source, std::string& reached_trigger_source)
+{
+  try
+  {
+    GenApi::CEnumerationPtr pTriggerSource = pDevice_->GetNodeMap()->GetNode("TriggerSource");
+    if (GenApi::IsWritable(pTriggerSource))
+    {
+      if(target_trigger_source == "Software" || target_trigger_source == "Line0" || target_trigger_source == "Line1" ||
+      target_trigger_source == "Line2" || target_trigger_source == "Line3" || target_trigger_source == "Action0")
+      {
+        GenICam::gcstring trigger_source_to_set = target_trigger_source.c_str();
+        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerSource", trigger_source_to_set);
+        reached_trigger_source = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerSource").c_str();
+      }
+      else
+      {
+        ROS_WARN_STREAM("Camera does not support the value '" << target_trigger_source << "' for TriggerSource. Will keep the current settings");
+        reached_trigger_source = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerSource").c_str();
+      }
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support TriggerSource. Will keep the current settings");
+      reached_trigger_source = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerSource").c_str();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target TriggerSource to " << target_trigger_source << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setTriggerSource(const std::string& target_trigger_source, std::string& reached_trigger_source)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setTriggerSourceValue(target_trigger_source, reached_trigger_source))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setTriggerSourceValue(target_trigger_source, reached_trigger_source))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setTriggerSource(): Unable to set target TriggerSource before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setTriggerActivationValue(const std::string& target_trigger_activation, std::string& reached_trigger_activation)
+{
+  try
+  {
+    GenApi::CEnumerationPtr pTriggerActivation = pDevice_->GetNodeMap()->GetNode("TriggerActivation");
+    if (GenApi::IsWritable(pTriggerActivation))
+    {
+      if(target_trigger_activation == "RisingEdge")
+      {
+        GenICam::gcstring trigger_activation_to_set = target_trigger_activation.c_str();
+        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerActivation", trigger_activation_to_set);
+        reached_trigger_activation = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerActivation").c_str();
+      }
+      else
+      {
+        ROS_WARN_STREAM("Camera does not support the value '" << target_trigger_activation << "' for TriggerActivation. Will keep the current settings");
+        reached_trigger_activation = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerActivation").c_str();
+      }
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support TriggerActivation. Will keep the current settings");
+      reached_trigger_activation = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "TriggerActivation").c_str();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target TriggerActivation to " << target_trigger_activation << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setTriggerActivation(const std::string& target_trigger_activation, std::string& reached_trigger_activation)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setTriggerActivationValue(target_trigger_activation, reached_trigger_activation))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setTriggerActivationValue(target_trigger_activation, reached_trigger_activation))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setTriggerActivation(): Unable to set target TriggerActivation before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setTriggerDelayValue(const float& target_trigger_delay, float& reached_trigger_delay)
+{
+  try
+  {
+    GenApi::CFloatPtr pTriggerDelay = pDevice_->GetNodeMap()->GetNode("TriggerDelay");
+    if (GenApi::IsWritable(pTriggerDelay))
+    {
+      float trigger_delay_to_set = target_trigger_delay;
+      if (trigger_delay_to_set < pTriggerDelay->GetMin())
+      {
+        ROS_WARN_STREAM("Desired Scan3dConfidenceThresholdMin '" << trigger_delay_to_set << "' unreachable! Setting to lower limit: " << pTriggerDelay->GetMin());
+        trigger_delay_to_set = pTriggerDelay->GetMin();
+      }
+      else if (trigger_delay_to_set > pTriggerDelay->GetMax())
+      {
+        ROS_WARN_STREAM("Desired Scan3dConfidenceThresholdMin '" << trigger_delay_to_set << "' unreachable! Setting to upper limit: " << pTriggerDelay->GetMax());
+          trigger_delay_to_set = pTriggerDelay->GetMax();
+      }
+      pTriggerDelay->SetValue(trigger_delay_to_set);
+      reached_trigger_delay = pTriggerDelay->GetValue();
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support Scan3dConfidenceThresholdMin. Will keep the current settings");
+      reached_trigger_delay = pTriggerDelay->GetValue();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target TriggerDelay to " << target_trigger_delay << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setTriggerDelay(const float& target_trigger_delay, float& reached_trigger_delay)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setTriggerDelayValue(target_trigger_delay, reached_trigger_delay))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setTriggerDelayValue(target_trigger_delay, reached_trigger_delay))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setTriggerDelay(): Unable to set target TriggerDelay before timeout");
         return false;
       }
       r.sleep();

@@ -301,43 +301,83 @@ protected:
 
   /**
    * Update the ExposureTimeSelector value
-   * @param target_exposure_time_selector
-   * @param reached_exposure_time_selector
-   * @return
+   * @param target_exposure_time_selector the target value
+   * @param reached_exposure_time_selector the value that could be reached
+   * @return true if the targeted value could be reached
    */
   bool setExposureTimeSelector(const std::string& target_exposure_time_selector, std::string& reached_exposure_time_selector);
 
   /**
    * Update the Scan3dOperatingMode value
-   * @param target_scan_3d_operating_mode
-   * @param reached_scan_3d_operating_mode
-   * @return
+   * @param target_scan_3d_operating_mode the target value
+   * @param reached_scan_3d_operating_mode the value that could be reached
+   * @return true if the targeted value could be reached
    */
   bool setScan3dOperatingMode(const std::string& target_scan_3d_operating_mode, std::string& reached_scan_3d_operating_mode);
 
   /**
    * Update the Scan3dConfidenceThresholdEnable value
-   * @param target_scan_3d_confidence_threshold_enable
-   * @param reached_scan_3d_confidence_threshold_enable
-   * @return
+   * @param target_scan_3d_confidence_threshold_enable the target value
+   * @param reached_scan_3d_confidence_threshold_enable the value that could be reached
+   * @return true if the targeted value could be reached
    */
   bool setScan3dConfidenceThresholdEnable(const bool& target_scan_3d_confidence_threshold_enable, bool& reached_scan_3d_confidence_threshold_enable);
 
   /**
    * Update the Scan3dConfidenceThresholdMin value
-   * @param target_scan_3d_confidence_threshold_min
-   * @param reached_scan_3d_confidence_threshold_min
-   * @return
+   * @param target_scan_3d_confidence_threshold_min the target value
+   * @param reached_scan_3d_confidence_threshold_min the value that could be reached
+   * @return true if the targeted value could be reached
    */
   bool setScan3dConfidenceThresholdMin(const int& target_scan_3d_confidence_threshold_min, int& reached_scan_3d_confidence_threshold_min);
 
   /**
    * Update the Scan3dHDRMode value
-   * @param target_scan_3d_hdr_mode
-   * @param reached_scan_3d_hdr_mode
-   * @return
+   * @param target_scan_3d_hdr_mode the target value
+   * @param reached_scan_3d_hdr_mode the value that could be reached
+   * @return true if the targeted value could be reached
    */
   bool setScan3dHDRMode(const std::string& target_scan_3d_hdr_mode, std::string& reached_scan_3d_hdr_mode);
+
+  /**
+   * Update the TriggerSelector value
+   * @param target_trigger_selector the target value
+   * @param reached_trigger_selector the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setTriggerSelector(const std::string& target_trigger_selector, std::string& reached_trigger_selector);
+
+  /**
+   * Update the TriggerMode value
+   * @param target_trigger_mode the target value
+   * @param reached_trigger_mode the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setTriggerMode(const std::string& target_trigger_mode, std::string& reached_trigger_mode);
+
+  /**
+   * Update the TriggerSource value
+   * @param target_trigger_source the target value
+   * @param reached_trigger_source the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setTriggerSource(const std::string& target_trigger_source, std::string& reached_trigger_source);
+
+  /**
+   * Update the TriggerActivation value
+   * @param target_trigger_activation the target value
+   * @param reached_trigger_activation the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setTriggerActivation(const std::string& target_trigger_activation, std::string& reached_trigger_activation);
+
+  /**
+   * Update the TriggerDelay value
+   * @param target_trigger_delay the target value
+   * @param reached_trigger_delay the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setTriggerDelay(const float& target_trigger_delay, float& reached_trigger_delay);
 
   // End Added
 
