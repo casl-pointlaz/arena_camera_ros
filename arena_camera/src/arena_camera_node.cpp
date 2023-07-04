@@ -433,12 +433,12 @@ bool ArenaCameraNode::startGrabbing()
     //
     // TRIGGER MODE
     //
-    GenApi::CStringPtr pTriggerMode = pNodeMap->GetNode("TriggerMode");
+    /* GenApi::CStringPtr pTriggerMode = pNodeMap->GetNode("TriggerMode");
     if (GenApi::IsWritable(pTriggerMode))
     {
       Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "TriggerMode", "On");
       Arena::SetNodeValue<GenICam::gcstring>(pNodeMap, "TriggerSource", "Software");
-    }
+    } */
 
     //
     // FRAMERATE
@@ -626,6 +626,20 @@ bool ArenaCameraNode::startGrabbing()
 
     // Added
 
+    // AcquisitionFrameRateEnable TODO: Check AcquisitionFrameRateEnable on ToF
+    bool reached_acquisition_frame_rate_enable;
+    if (setAcquisitionFrameRateEnable(true, reached_acquisition_frame_rate_enable))
+      ROS_INFO_STREAM("AcquisitionFrameRateEnable set to: " << reached_acquisition_frame_rate_enable);
+    else
+      ROS_ERROR_STREAM("Error while setting AcquisitionFrameRateEnable. Current AcquisitionFrameRateEnable value is: " << reached_acquisition_frame_rate_enable);
+
+    // AcquisitionFrameRate TODO: Check AcquisitionFrameRate on ToF
+    float reached_acquisition_frame_rate;
+    if (setAcquisitionFrameRate(arena_camera_parameter_set_.frameRate(), reached_acquisition_frame_rate))
+      ROS_INFO_STREAM("AcquisitionFrameRate set to: " << reached_acquisition_frame_rate);
+    else
+      ROS_ERROR_STREAM("Error while setting AcquisitionFrameRate. Current AcquisitionFrameRate value is: " << reached_acquisition_frame_rate);
+
     // AcquisitionMode
     std::string reached_acquisition_mode;
     if (setAcquisitionMode(arena_camera_parameter_set_.acquisition_mode_, reached_acquisition_mode))
@@ -724,15 +738,19 @@ bool ArenaCameraNode::startGrabbing()
     //
 
     pDevice_->StartStream();
-    bool isTriggerArmed = false;
 
-    if (GenApi::IsWritable(pTriggerMode))
+    if(arena_camera_parameter_set_.trigger_mode_ == "On" && arena_camera_parameter_set_.trigger_source_ == "Software")
     {
-      do
+      bool isTriggerArmed = false;
+      GenApi::CStringPtr pTriggerMode = pNodeMap->GetNode("TriggerMode");
+      if (GenApi::IsWritable(pTriggerMode))
       {
-        isTriggerArmed = Arena::GetNodeValue<bool>(pNodeMap, "TriggerArmed");
-      } while (isTriggerArmed == false);
-      Arena::ExecuteNode(pNodeMap, "TriggerSoftware");
+        do
+        {
+          isTriggerArmed = Arena::GetNodeValue<bool>(pNodeMap, "TriggerArmed");
+        } while (isTriggerArmed == false);
+        Arena::ExecuteNode(pNodeMap, "TriggerSoftware");
+      }
     }
 
     pImage_ = pDevice_->GetImage(5000);
@@ -961,17 +979,21 @@ bool ArenaCameraNode::grabImage()
   boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
   try
   {
-    GenApi::CStringPtr pTriggerMode = pDevice_->GetNodeMap()->GetNode("TriggerMode");
-    if (GenApi::IsWritable(pTriggerMode))
+    if(arena_camera_parameter_set_.trigger_mode_ == "On" && arena_camera_parameter_set_.trigger_source_ == "Software")
     {
-      bool isTriggerArmed = false;
-
-      do
+      GenApi::CStringPtr pTriggerMode = pDevice_->GetNodeMap()->GetNode("TriggerMode");
+      if (GenApi::IsWritable(pTriggerMode))
       {
-        isTriggerArmed = Arena::GetNodeValue<bool>(pDevice_->GetNodeMap(), "TriggerArmed");
-      } while (isTriggerArmed == false);
-      Arena::ExecuteNode(pDevice_->GetNodeMap(), "TriggerSoftware");
+        bool isTriggerArmed = false;
+
+        do
+        {
+          isTriggerArmed = Arena::GetNodeValue<bool>(pDevice_->GetNodeMap(), "TriggerArmed");
+        } while (isTriggerArmed == false);
+        Arena::ExecuteNode(pDevice_->GetNodeMap(), "TriggerSoftware");
+      }
     }
+
     pImage_ = pDevice_->GetImage(5000);
     pData_ = pImage_->GetData();
 
@@ -2035,6 +2057,121 @@ bool ArenaCameraNode::setBrightnessCallback(camera_control_msgs::SetBrightness::
 
 // Added
 
+bool setAcquisitionFrameRateEnableValue(const bool& target_acquisition_frame_rate_enable, bool& reached_acquisition_frame_rate_enable)
+{
+  try
+  {
+    GenApi::CBooleanPtr pAcquisitionFrameRateEnable = pDevice_->GetNodeMap()->GetNode("AcquisitionFrameRateEnable");
+    if (GenApi::IsWritable(pAcquisitionFrameRateEnable))
+    {
+      bool acquisition_frame_rate_enable_to_set = target_acquisition_frame_rate_enable;
+      pAcquisitionFrameRateEnable->SetValue(acquisition_frame_rate_enable_to_set);
+      reached_acquisition_frame_rate_enable = pAcquisitionFrameRateEnable->GetValue();
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support AcquisitionFrameRateEnable. Will keep the current settings");
+      reached_acquisition_frame_rate_enable = pAcquisitionFrameRateEnable->GetValue();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target AcquisitionFrameRateEnable to " << std::to_string(target_acquisition_frame_rate_enable) << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setAcquisitionFrameRateEnable(const bool& target_acquisition_frame_rate_enable, bool& reached_acquisition_frame_rate_enable)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setAcquisitionFrameRateEnableValue(target_acquisition_frame_rate_enable, reached_acquisition_frame_rate_enable))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setAcquisitionFrameRateEnableValue(target_acquisition_frame_rate_enable, reached_acquisition_frame_rate_enable))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setAcquisitionFrameRateEnable(): Unable to set target AcquisitionFrameRateEnable before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setAcquisitionFrameRateValue(const float& target_acquisition_frame_rate, float& reached_acquisition_frame_rate)
+{
+  try
+  {
+    // TODO: Verify AcquisitionFrameRate Type and max and min values
+    GenApi::CFloatPtr pAcquisitionFrameRate = pDevice_->GetNodeMap()->GetNode("AcquisitionFrameRate");
+    if (GenApi::IsWritable(pAcquisitionFrameRate))
+    {
+      float acquisition_frame_rate_to_set = target_acquisition_frame_rate;
+      if (acquisition_frame_rate_to_set < pAcquisitionFrameRate->GetMin())
+      {
+        ROS_WARN_STREAM("Desired AcquisitionFrameRate '" << acquisition_frame_rate_to_set << "' unreachable! Setting to lower limit: " << pAcquisitionFrameRate->GetMin());
+        acquisition_frame_rate_to_set = pAcquisitionFrameRate->GetMin();
+      }
+      else if (acquisition_frame_rate_to_set > pAcquisitionFrameRate->GetMax())
+      {
+        ROS_WARN_STREAM("Desired AcquisitionFrameRate '" << acquisition_frame_rate_to_set << "' unreachable! Setting to upper limit: " << pAcquisitionFrameRate->GetMax());
+        acquisition_frame_rate_to_set = pAcquisitionFrameRate->GetMax();
+      }
+      pAcquisitionFrameRate->SetValue(acquisition_frame_rate_to_set);
+      reached_acquisition_frame_rate = pAcquisitionFrameRate->GetValue();
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support AcquisitionFrameRate. Will keep the current settings");
+      reached_acquisition_frame_rate = pAcquisitionFrameRate->GetValue();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target AcquisitionFrameRate to " << target_acquisition_frame_rate << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setAcquisitionFrameRate(const float& target_acquisition_frame_rate, float& reached_acquisition_frame_rate)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setAcquisitionFrameRateValue(target_acquisition_frame_rate, reached_acquisition_frame_rate))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setAcquisitionFrameRateValue(target_acquisition_frame_rate, reached_acquisition_frame_rate))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setAcquisitionFrameRate(): Unable to set target AcquisitionFrameRate before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
 bool setAcquisitionModeValue(const std::string& target_acquisition_mode, std::string& reached_acquisition_mode)
 {
   try
@@ -2759,12 +2896,12 @@ bool setTriggerDelayValue(const float& target_trigger_delay, float& reached_trig
       float trigger_delay_to_set = target_trigger_delay;
       if (trigger_delay_to_set < pTriggerDelay->GetMin())
       {
-        ROS_WARN_STREAM("Desired Scan3dConfidenceThresholdMin '" << trigger_delay_to_set << "' unreachable! Setting to lower limit: " << pTriggerDelay->GetMin());
+        ROS_WARN_STREAM("Desired TriggerDelay '" << trigger_delay_to_set << "' unreachable! Setting to lower limit: " << pTriggerDelay->GetMin());
         trigger_delay_to_set = pTriggerDelay->GetMin();
       }
       else if (trigger_delay_to_set > pTriggerDelay->GetMax())
       {
-        ROS_WARN_STREAM("Desired Scan3dConfidenceThresholdMin '" << trigger_delay_to_set << "' unreachable! Setting to upper limit: " << pTriggerDelay->GetMax());
+        ROS_WARN_STREAM("Desired TriggerDelay '" << trigger_delay_to_set << "' unreachable! Setting to upper limit: " << pTriggerDelay->GetMax());
           trigger_delay_to_set = pTriggerDelay->GetMax();
       }
       pTriggerDelay->SetValue(trigger_delay_to_set);
@@ -2772,7 +2909,7 @@ bool setTriggerDelayValue(const float& target_trigger_delay, float& reached_trig
     }
     else
     {
-      ROS_WARN_STREAM("Camera does not support Scan3dConfidenceThresholdMin. Will keep the current settings");
+      ROS_WARN_STREAM("Camera does not support TriggerDelay. Will keep the current settings");
       reached_trigger_delay = pTriggerDelay->GetValue();
     }
   }

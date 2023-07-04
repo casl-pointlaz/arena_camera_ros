@@ -25,12 +25,42 @@ image_encoding: "coord3d_abcy16"
 #  The desired publisher frame rate if listening to the topics.
 #  This parameter can only be set once at startup
 #  Calling the GrabImages-Action can result in a higher framerate
+# TODO: Get min and max values
 frame_rate: 10.0
 
 # Added
 
+# TODO: Check TransmissionFrameRate
+
+# Here are the 3 different behaviors for the ToF image acquisition synchronisation and how to tune the parameters to reach them
+# (the other parameters values do not matter for the image acquisition synchronisation):
+#
+#   - ToF image acquisition synchronised on a physical trigger sent at 10Hz: TODO: To be tested
+#       frame_rate: 10.0
+#       acquisition_mode: "Continuous"
+#       trigger_selector: "FrameStart"
+#       trigger_mode: "On"
+#       trigger_source: TODO
+#       trigger_activation: "RisingEdge"
+#       trigger_delay: 0.0
+#
+#   - ToF image acquisition synchronised on a Software Trigger sent at 10Hz (standard node behavior):
+#       frame_rate: 10.0
+#       acquisition_mode: "Continuous"
+#       trigger_selector: "FrameStart"
+#       trigger_mode: "On"
+#       trigger_source: "Software"
+#       trigger_activation: "RisingEdge"
+#       trigger_delay: 0.0
+#
+#   - ToF image acquisition synchronised on the camera internal timer at 10Hz: TODO: To be tested
+#       frame_rate: 10.0
+#       acquisition_mode: "Continuous"
+#       trigger_mode: "Off"
+
+
 # Selects the type of Acquisition. It uses an enumeration string format.
-# Can only be: TODO: To verify on ToF and fill description
+# Can only be: TODO: Verify on ToF and fill description
 #   "SingleFrame":
 #   "MultiFrame":
 #   "Continuous":
@@ -123,7 +153,7 @@ trigger_delay: 0.0                                # (float) TriggerDelay
 # For example, if get_camera_parameter_info == "Exposure", the node will echo the info of every camera parameter containing "Exposure" in their names
 # Set the parameter to "all" to get the info for all parameters
 # Set the parameter to "none" or comment it and to not get any info
-get_camera_parameter_info: "Exposure"             # (string)
+get_camera_parameter_info: "Acquisition"             # (string)
 
 # Controls the echo of the elapsed time to grab and publish an image.
 echo_elapsed_time: false

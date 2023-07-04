@@ -284,6 +284,22 @@ protected:
   // Added
 
   /**
+   * Update the AcquisitionFrameRateEnable value
+   * @param target_acquisition_frame_rate_enable the target value
+   * @param reached_acquisition_frame_rate_enable the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setAcquisitionFrameRateEnable(const bool& target_acquisition_frame_rate_enable, bool& reached_acquisition_frame_rate_enable);
+
+  /**
+   *  Update the AcquisitionFrameRate value
+   * @param target_acquisition_frame_rate the target value
+   * @param reached_acquisition_frame_rate the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setAcquisitionFrameRate(const float& target_acquisition_frame_rate, float& reached_acquisition_frame_rate);
+
+  /**
    * Update the AcquisitionMode value
    * @param target_acquisition_mode the target value
    * @param reached_acquisition_mode the value that could be reached
