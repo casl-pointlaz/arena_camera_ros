@@ -290,6 +290,9 @@ public:
 
   // Added
 
+  /** Selects the acquisition mode. */
+  std::string acquisition_mode_;
+
   /** Flag to indicates if we want to publish the PointCloud or not */
   bool publish_point_cloud_;
 

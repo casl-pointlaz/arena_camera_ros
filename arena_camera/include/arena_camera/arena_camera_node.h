@@ -284,6 +284,14 @@ protected:
   // Added
 
   /**
+   * Update the AcquisitionMode value
+   * @param target_acquisition_mode the target value
+   * @param reached_acquisition_mode the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setAcquisitionMode(const std::string& target_acquisition_mode, std::string& reached_acquisition_mode);
+
+  /**
   * Update the Scan3dSpatialFilterEnable value
   * @param target_scan_3d_spatial_filter_enable the target value
   * @param reached_scan_3d_spatial_filter_enable_ the value that could be reached

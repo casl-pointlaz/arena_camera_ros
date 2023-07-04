@@ -76,6 +76,7 @@ ArenaCameraParameter::ArenaCameraParameter()
   // ##########################
   // Added
   // ##########################
+  , acquisition_mode_("Continuous")
   , publish_point_cloud_(false)
   , scan_3d_spatial_filter_enable_(false)
   , scan_3d_flying_pixels_removal_enable_(false)
@@ -392,6 +393,13 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
   ROS_WARN("Autoflash: %i, line2: %i , line3: %i ", auto_flash_, auto_flash_line_2_, auto_flash_line_3_);
 
   // Added
+
+  // Get publish_point_cloud_
+  if (nh.hasParam("acquisition_mode"))
+  {
+    nh.param<std::string>("acquisition_mode", acquisition_mode_, "Continuous");
+    ROS_DEBUG_STREAM("acquisition_mode will be: " << acquisition_mode_);
+  }
 
   // Get publish_point_cloud_
   if (nh.hasParam("publish_point_cloud"))
