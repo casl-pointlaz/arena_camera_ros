@@ -290,7 +290,7 @@ public:
 
   // Added
 
-  /** Selects the acquisition mode. */
+  /** Specifies the acquisition mode of the current device. It helps determine the number of frames to acquire during each acquisition sequence. */
   std::string acquisition_mode_;
 
   /** Flag to indicates if we want to publish the PointCloud or not */

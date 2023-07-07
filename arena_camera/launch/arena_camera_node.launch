@@ -1,17 +1,16 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="respawn" default="false" />
-    <arg name="debug" default="false" />
-    <arg name="node_name" default="arena_camera_node" />
-    <arg name="config_file" default="$(find arena_camera)/config/default.yaml" />
-    <arg name="open_rviz" default="false" />
+    <arg name="respawn"             default="false" />
+    <arg name="debug"               default="false" />
+    <arg name="node_name"           default="arena_camera_node" />
+    <arg name="config_file"         default="$(find arena_camera)/config/default.yaml" />
+    <arg name="open_rviz"           default="false" />
 
     <arg unless="$(arg debug)" name="launch_prefix" value="" />
     <arg     if="$(arg debug)" name="launch_prefix" value="gdb -ex run --args" />
 
-    <node name="$(arg node_name)" pkg="arena_camera" type="arena_camera_node" output="screen"
-          respawn="$(arg respawn)" launch-prefix="$(arg launch_prefix)">
-        <rosparam command="load" file="$(arg config_file)" />
+    <node name="$(arg node_name)" pkg="arena_camera" type="arena_camera_node" output="screen" respawn="$(arg respawn)" launch-prefix="$(arg launch_prefix)">
+        <rosparam command="load"    file="$(arg config_file)" />
     </node>
 
     <!-- Launch Rviz if open_rviz == true -->

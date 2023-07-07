@@ -626,14 +626,18 @@ bool ArenaCameraNode::startGrabbing()
 
     // Added
 
-    // AcquisitionFrameRateEnable TODO: Check AcquisitionFrameRateEnable on ToF
-    bool reached_acquisition_frame_rate_enable;
-    if (setAcquisitionFrameRateEnable(true, reached_acquisition_frame_rate_enable))
+    // AcquisitionFrameRateEnable
+    bool target_acquisition_frame_rate_enable, reached_acquisition_frame_rate_enable;
+    if(arena_camera_parameter_set_.trigger_mode_ == "On")
+      target_acquisition_frame_rate_enable = false;
+    else
+      target_acquisition_frame_rate_enable = true;
+    if (setAcquisitionFrameRateEnable(target_acquisition_frame_rate_enable, reached_acquisition_frame_rate_enable))
       ROS_INFO_STREAM("AcquisitionFrameRateEnable set to: " << reached_acquisition_frame_rate_enable);
     else
       ROS_ERROR_STREAM("Error while setting AcquisitionFrameRateEnable. Current AcquisitionFrameRateEnable value is: " << reached_acquisition_frame_rate_enable);
 
-    // AcquisitionFrameRate TODO: Check AcquisitionFrameRate on ToF
+    // AcquisitionFrameRate
     float reached_acquisition_frame_rate;
     if (setAcquisitionFrameRate(arena_camera_parameter_set_.frameRate(), reached_acquisition_frame_rate))
       ROS_INFO_STREAM("AcquisitionFrameRate set to: " << reached_acquisition_frame_rate);
@@ -742,15 +746,11 @@ bool ArenaCameraNode::startGrabbing()
     if(arena_camera_parameter_set_.trigger_mode_ == "On" && arena_camera_parameter_set_.trigger_source_ == "Software")
     {
       bool isTriggerArmed = false;
-      GenApi::CStringPtr pTriggerMode = pNodeMap->GetNode("TriggerMode");
-      if (GenApi::IsWritable(pTriggerMode))
+      do
       {
-        do
-        {
-          isTriggerArmed = Arena::GetNodeValue<bool>(pNodeMap, "TriggerArmed");
-        } while (isTriggerArmed == false);
-        Arena::ExecuteNode(pNodeMap, "TriggerSoftware");
-      }
+        isTriggerArmed = Arena::GetNodeValue<bool>(pNodeMap, "TriggerArmed");
+      } while (isTriggerArmed == false);
+      Arena::ExecuteNode(pNodeMap, "TriggerSoftware");
     }
 
     pImage_ = pDevice_->GetImage(5000);
@@ -981,17 +981,13 @@ bool ArenaCameraNode::grabImage()
   {
     if(arena_camera_parameter_set_.trigger_mode_ == "On" && arena_camera_parameter_set_.trigger_source_ == "Software")
     {
-      GenApi::CStringPtr pTriggerMode = pDevice_->GetNodeMap()->GetNode("TriggerMode");
-      if (GenApi::IsWritable(pTriggerMode))
-      {
-        bool isTriggerArmed = false;
+      bool isTriggerArmed = false;
 
-        do
-        {
-          isTriggerArmed = Arena::GetNodeValue<bool>(pDevice_->GetNodeMap(), "TriggerArmed");
-        } while (isTriggerArmed == false);
-        Arena::ExecuteNode(pDevice_->GetNodeMap(), "TriggerSoftware");
-      }
+      do
+      {
+        isTriggerArmed = Arena::GetNodeValue<bool>(pDevice_->GetNodeMap(), "TriggerArmed");
+      } while (isTriggerArmed == false);
+      Arena::ExecuteNode(pDevice_->GetNodeMap(), "TriggerSoftware");
     }
 
     pImage_ = pDevice_->GetImage(5000);
@@ -2113,7 +2109,6 @@ bool setAcquisitionFrameRateValue(const float& target_acquisition_frame_rate, fl
 {
   try
   {
-    // TODO: Verify AcquisitionFrameRate Type and max and min values
     GenApi::CFloatPtr pAcquisitionFrameRate = pDevice_->GetNodeMap()->GetNode("AcquisitionFrameRate");
     if (GenApi::IsWritable(pAcquisitionFrameRate))
     {
@@ -2176,7 +2171,6 @@ bool setAcquisitionModeValue(const std::string& target_acquisition_mode, std::st
 {
   try
   {
-    // TODO: Verify AcquisitionMode Type and values
     GenApi::CEnumerationPtr pAcquisitionMode = pDevice_->GetNodeMap()->GetNode("AcquisitionMode");
     if (GenApi::IsWritable(pAcquisitionMode))
     {
@@ -2642,7 +2636,6 @@ bool setTriggerSelectorValue(const std::string& target_trigger_selector, std::st
 {
   try
   {
-    // TODO: Verify TriggerSelector Type
     GenApi::CEnumerationPtr pTriggerSelector = pDevice_->GetNodeMap()->GetNode("TriggerSelector");
     if (GenApi::IsWritable(pTriggerSelector))
     {
@@ -2705,7 +2698,6 @@ bool setTriggerModeValue(const std::string& target_trigger_mode, std::string& re
 {
   try
   {
-    // TODO: Verify TriggerMode Type
     GenApi::CEnumerationPtr pTriggerMode = pDevice_->GetNodeMap()->GetNode("TriggerMode");
     if (GenApi::IsWritable(pTriggerMode))
     {
@@ -2766,7 +2758,6 @@ bool setTriggerSourceValue(const std::string& target_trigger_source, std::string
 {
   try
   {
-    // TODO: Verify TriggerSource Type
     GenApi::CEnumerationPtr pTriggerSource = pDevice_->GetNodeMap()->GetNode("TriggerSource");
     if (GenApi::IsWritable(pTriggerSource))
     {
@@ -2828,7 +2819,6 @@ bool setTriggerActivationValue(const std::string& target_trigger_activation, std
 {
   try
   {
-    // TODO: Verify TriggerActivation Type
     GenApi::CEnumerationPtr pTriggerActivation = pDevice_->GetNodeMap()->GetNode("TriggerActivation");
     if (GenApi::IsWritable(pTriggerActivation))
     {
@@ -2889,7 +2879,6 @@ bool setTriggerDelayValue(const float& target_trigger_delay, float& reached_trig
 {
   try
   {
-    // TODO: Verify TriggerDelay Type and max and min values
     GenApi::CFloatPtr pTriggerDelay = pDevice_->GetNodeMap()->GetNode("TriggerDelay");
     if (GenApi::IsWritable(pTriggerDelay))
     {

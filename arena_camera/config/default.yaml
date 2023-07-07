@@ -25,22 +25,21 @@ image_encoding: "coord3d_abcy16"
 #  The desired publisher frame rate if listening to the topics.
 #  This parameter can only be set once at startup
 #  Calling the GrabImages-Action can result in a higher framerate
-# TODO: Get min and max values
+#   Min value: 0.1
+#   Max value: 30.0
 frame_rate: 10.0
 
 # Added
 
-# TODO: Check TransmissionFrameRate
-
 # Here are the 3 different behaviors for the ToF image acquisition synchronisation and how to tune the parameters to reach them
 # (the other parameters values do not matter for the image acquisition synchronisation):
 #
-#   - ToF image acquisition synchronised on a physical trigger sent at 10Hz: TODO: To be tested
+#   - ToF image acquisition synchronised on a physical trigger sent at 10Hz:
 #       frame_rate: 10.0
 #       acquisition_mode: "Continuous"
 #       trigger_selector: "FrameStart"
 #       trigger_mode: "On"
-#       trigger_source: TODO
+#       trigger_source: "Line0"
 #       trigger_activation: "RisingEdge"
 #       trigger_delay: 0.0
 #
@@ -53,17 +52,17 @@ frame_rate: 10.0
 #       trigger_activation: "RisingEdge"
 #       trigger_delay: 0.0
 #
-#   - ToF image acquisition synchronised on the camera internal timer at 10Hz: TODO: To be tested
+#   - ToF image acquisition synchronised on the camera internal timer at 10Hz:
 #       frame_rate: 10.0
 #       acquisition_mode: "Continuous"
 #       trigger_mode: "Off"
 
 
-# Selects the type of Acquisition. It uses an enumeration string format.
-# Can only be: TODO: Verify on ToF and fill description
-#   "SingleFrame":
-#   "MultiFrame":
-#   "Continuous":
+# Specifies the acquisition mode of the current device. It helps determine the number of frames to acquire during each acquisition sequence. It uses an enumeration string format.
+# Can only be:
+#   "SingleFrame": Only a single frame is acquired.
+#   "MultiFrame": Frames are acquired based on the specification of AcquisitionFrameCount parameter.
+#   "Continuous": Frames are captured continuously until AcquisitionStop is called.
 acquisition_mode: "Continuous"                  # (enum string) AcquisitionMode
 
 # If true and if image_encoding == "coord3d_abcy16", the data will be converted to point cloud.
@@ -97,12 +96,12 @@ exposure_time_selector: "Exp1000Us"             # (enum string) ExposureTimeSele
 scan_3d_operating_mode: "Distance1250mmSingleFreq"      # (enum string) Scan3dOperatingMode
 
 # Controls if the confidence threshold is enabled and applied to the output.
-scan_3d_confidence_threshold_enable: true       # (bool) Scan3dConfidenceThresholdEnable
+scan_3d_confidence_threshold_enable: true         # (bool) Scan3dConfidenceThresholdEnable
 
 # Controls the minimum threshold value that determines whether or not the depth of a pixel is reliable.
 #   Min value: 0
 #   Max value: 65535
-scan_3d_confidence_threshold_min: 5000          # (int) Scan3dConfidenceThresholdMin
+scan_3d_confidence_threshold_min: 5000            # (int) Scan3dConfidenceThresholdMin
 
 # Specifies high dynamic range (HDR) mode. It uses an enumeration string format.
 # Can only be:
@@ -112,7 +111,7 @@ scan_3d_confidence_threshold_min: 5000          # (int) Scan3dConfidenceThreshol
 #   "LowNoiseHDRX8": None
 #   "LowNoiseHDRX16": None
 #   "LowNoiseHDRX32": None
-scan_3d_hdr_mode: "Off"                         # (enum string) Scan3dHDRMode
+scan_3d_hdr_mode: "Off"                           # (enum string) Scan3dHDRMode
 
 # This node selects the specific trigger type to configure. It uses an enumeration string format.
 # Can only be:
@@ -122,13 +121,13 @@ scan_3d_hdr_mode: "Off"                         # (enum string) Scan3dHDRMode
 #   "ExposureActive": Trigger signal pulse width determines the length of the ExposureTime.
 #   "LineStart": Selects a trigger starting the capture of one Line of a Frame.
 #   "FrameBurstActive": Trigger signal will capture burst of frames when source is high.
-trigger_selector: "FrameStart"                  # (enum string) TriggerSelector
+trigger_selector: "FrameStart"                    # (enum string) TriggerSelector
 
 # Controls the On/Off status of the current trigger. It uses an enumeration string format.
 # Can only be:
 #   "Off": Disable current trigger.
 #   "On": Enable current trigger.
-trigger_mode: "On"                             # (enum string) TriggerMode
+trigger_mode: "On"                                # (enum string) TriggerMode
 
 # This node specifies the source of the trigger. It can be a software internal signal of a physical input hardware signal. It uses an enumeration string format.
 # Can only be:
@@ -146,14 +145,15 @@ trigger_source: "Software"                        # (enum string) TriggerSource
 trigger_activation: "RisingEdge"                  # (enum string) TriggerActivation
 
 # Specifies the delay in microseconds (us) to apply after the trigger reception before activating it.
-# TODO: Get min and max values
+#   Min value: 0.0
+#   Max value: 1.67772e+07
 trigger_delay: 0.0                                # (float) TriggerDelay
 
 # The node will display the info of every camera parameter containing get_camera_parameter_info in their names
 # For example, if get_camera_parameter_info == "Exposure", the node will echo the info of every camera parameter containing "Exposure" in their names
 # Set the parameter to "all" to get the info for all parameters
 # Set the parameter to "none" or comment it and to not get any info
-get_camera_parameter_info: "Acquisition"             # (string)
+get_camera_parameter_info: "none"                 # (string)
 
 # Controls the echo of the elapsed time to grab and publish an image.
 echo_elapsed_time: false
