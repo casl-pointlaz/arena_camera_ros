@@ -137,7 +137,7 @@ trigger_mode: "On"                                # (enum string) TriggerMode
 #   "Line2": None
 #   "Line3": None
 #   "Action0": None
-trigger_source: "Software"                        # (enum string) TriggerSource
+trigger_source: "Line0"                           # (enum string) TriggerSource
 
 # This node specifies the state in which trigger is activated. It uses an enumeration string format.
 # Can only be:
