@@ -54,14 +54,33 @@ cd ~/ArenaSDK_Linux_x64/Utilities
 12. You should see the echo of a list, containing one item. It is your **camera 0**.
 13. Note the IP of the camera, and return to the **Settings/Network** window.
 14. Click the "gear" icon of the Ethernet port of your **camera 0**.
-15. In the **IPv4** Tab, change the **Address** by the IP Address of the camera, and change the last number by 1 (or something different from the last number of your camera IP Address). For example, if your camera IP Address is "169.254.40.215", enter the Address "169.254.40.1".
+15. In the **IPv4** Tab, change the **Address** by the IP Address of the camera, and change the last number by 1. For example, if your camera IP Address is "169.254.40.215", enter the Address "169.254.40.1".
 16. Change the **Netmask** by "255.255.255.0".
 17. Click on **Apply** to save the changes. The window should close. 
 18. Disable and enable the interface once to assign the IP address to the interface (toggle the purple button).
+19. Return to the terminal and run the next command to force the new IP address **192.168.4.10** to your camera:
+```
+./IpConfigUtility /force -i 0 -a 192.168.4.10 -s 255.255.0.0 -g 0.0.0.0
+```
+20. Wait for the process to finish and press enter when asked.
+21. Run the next command to set the IP address to persistent:
+```
+./IpConfigUtility /persist -i 0 -p true -a 192.168.4.10 -s 255.255.0.0 -g 0.0.0.0
+```
+22. Wait for the process to finish and press enter when asked.
+23. Return to your Network settings and click the "gear" icon of the Ethernet port of your **camera 0**.
+24. In the **IPv4** Tab, change the **Address** by **192.168.4.1**. 
+25. Change the **Netmask** by **255.255.255.0**. 
+26. Click on **Apply** to save the changes. The window should close. 
+27. Disable and enable the interface once to assign the IP address to the interface (toggle the purple button). 
+28. The Ethernet configuration of your **camera 0** is completed.
 
 #### Second ToF camera (camera 1)
-Without unplugging your **camera 0**, plug your **camera 1** in its Ethernet port and repeat the same steps you did with the **camera 0**, but for the **camera 1**.  
-When these steps finished, your Ethernet ports configuration should be properly done.
+DIsable to Ethernet port of your **camera 0** or unplug it, plug your **camera 1** in its Ethernet port and repeat the same steps you did with the **camera 0**, but for the **camera 1** with the addresses **192.168.5.1** and **192.168.5.10**.  
+When these steps finished, enable the Ethernet port of your **camera 0** and your Ethernet ports configuration should be properly done. You can verify it using:
+```
+./IpConfigUtility /list
+```
 
 ### Device User ID configuration to run multiple ToF at the same time
 To differentiate the cameras, the ROS node use the Device User ID of each camera.  
