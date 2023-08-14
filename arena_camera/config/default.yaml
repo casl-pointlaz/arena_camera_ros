@@ -76,8 +76,8 @@ scan_3d_spatial_filter_enable: true             # (bool) Scan3dSpatialFilterEnab
 scan_3d_flying_pixels_removal_enable: true      # (bool) Scan3dFlyingPixelsRemovalEnable
 
 # Controls the distance threshold in the filter for removing flying pixels.
-#   Min value:
-#   Max value:
+#   Min value: 0
+#   Max value: 300
 scan_3d_flying_pixels_distance_threshold: 15    # (int) Scan3dFlyingPixelsDistanceThreshold
 
 # Selects the exposure time. It uses an enumeration string format.
