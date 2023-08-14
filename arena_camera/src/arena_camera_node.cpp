@@ -665,7 +665,14 @@ bool ArenaCameraNode::startGrabbing()
     else
       ROS_ERROR_STREAM("Error while setting Scan3dFlyingPixelsRemovalEnable. Current Scan3dFlyingPixelsRemovalEnable value is: " << reached_scan_3d_flying_pixels_removal_enable);
 
-    // ExposureTimeSelector
+    // Scan3dFlyingPixelsDistanceThreshold
+    int reached_scan_3d_flying_pixels_distance_threshold;
+    if (setScan3dFlyingPixelsDistanceThreshold(arena_camera_parameter_set_.scan_3d_flying_pixels_distance_threshold_, reached_scan_3d_flying_pixels_distance_threshold))
+      ROS_INFO_STREAM("Scan3dFlyingPixelsDistanceThreshold set to: " << reached_scan_3d_flying_pixels_distance_threshold);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dFlyingPixelsDistanceThreshold. Current Scan3dFlyingPixelsDistanceThreshold value is: " << reached_scan_3d_flying_pixels_distance_threshold);
+
+      // ExposureTimeSelector
     std::string reached_exposure_time_selector;
     if (setExposureTimeSelector(arena_camera_parameter_set_.exposure_time_selector_, reached_exposure_time_selector))
       ROS_INFO_STREAM("ExposureTimeSelector set to: " << reached_exposure_time_selector);
@@ -699,6 +706,13 @@ bool ArenaCameraNode::startGrabbing()
       ROS_INFO_STREAM("Scan3dHDRMode set to: " << reached_scan_3d_hdr_mode);
     else
       ROS_ERROR_STREAM("Error while setting Scan3dHDRMode. Current Scan3dHDRMode value is: " << reached_scan_3d_hdr_mode);
+
+    // Scan3dModeSelector
+    std::string reached_scan_3d_mode_selector;
+    if (setScan3dModeSelector(arena_camera_parameter_set_.scan_3d_mode_selector_, reached_scan_3d_mode_selector))
+      ROS_INFO_STREAM("Scan3dModeSelector set to: " << reached_scan_3d_mode_selector);
+    else
+      ROS_ERROR_STREAM("Error while setting Scan3dModeSelector. Current Scan3dModeSelector value is: " << reached_scan_3d_mode_selector);
 
     // TriggerSelector
     std::string reached_trigger_selector;
@@ -2332,6 +2346,68 @@ bool ArenaCameraNode::setScan3dFlyingPixelsRemovalEnable(const bool& target_scan
   return true;
 }
 
+bool setScan3dFlyingPixelsDistanceThresholdValue(const int& target_scan_3d_flying_pixels_distance_threshold, int& reached_scan_3d_flying_pixels_distance_threshold)
+{
+  try
+  {
+    GenApi::CIntegerPtr pScan3dFlyingPixelsDistanceThreshold = pDevice_->GetNodeMap()->GetNode("Scan3dFlyingPixelsDistanceThreshold");
+    if (GenApi::IsWritable(pScan3dFlyingPixelsDistanceThreshold))
+    {
+      int scan_3d_flying_pixels_distance_to_set = target_scan_3d_flying_pixels_distance_threshold;
+      if (scan_3d_flying_pixels_distance_to_set < pScan3dFlyingPixelsDistanceThreshold->GetMin())
+      {
+        ROS_WARN_STREAM("Desired Scan3dFlyingPixelsDistanceThreshold '" << scan_3d_flying_pixels_distance_to_set << "' unreachable! Setting to lower limit: " << pScan3dFlyingPixelsDistanceThreshold->GetMin());
+          scan_3d_flying_pixels_distance_to_set = pScan3dFlyingPixelsDistanceThreshold->GetMin();
+      }
+      else if (scan_3d_flying_pixels_distance_to_set > pScan3dFlyingPixelsDistanceThreshold->GetMax())
+      {
+        ROS_WARN_STREAM("Desired Scan3dFlyingPixelsDistanceThreshold '" << scan_3d_flying_pixels_distance_to_set << "' unreachable! Setting to upper limit: " << pScan3dFlyingPixelsDistanceThreshold->GetMax());
+          scan_3d_flying_pixels_distance_to_set = pScan3dFlyingPixelsDistanceThreshold->GetMax();
+      }
+      pScan3dFlyingPixelsDistanceThreshold->SetValue(scan_3d_flying_pixels_distance_to_set);
+      reached_scan_3d_flying_pixels_distance_threshold = pScan3dFlyingPixelsDistanceThreshold->GetValue();
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support Scan3dFlyingPixelsDistanceThreshold. Will keep the current settings");
+        reached_scan_3d_flying_pixels_distance_threshold = pScan3dFlyingPixelsDistanceThreshold->GetValue();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target pScan3dFlyingPixelsDistanceThreshold to " << std::to_string(target_scan_3d_flying_pixels_distance_threshold) << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setScan3dFlyingPixelsDistanceThreshold(const int& target_scan_3d_flying_pixels_distance_threshold, int& reached_scan_3d_flying_pixels_distance_threshold)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setScan3dFlyingPixelsDistanceThresholdValue(target_scan_3d_flying_pixels_distance_threshold, reached_scan_3d_flying_pixels_distance_threshold))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setScan3dFlyingPixelsDistanceThresholdValue(target_scan_3d_flying_pixels_distance_threshold, reached_scan_3d_flying_pixels_distance_threshold))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setScan3dFlyingPixelsDistanceThreshold(): Unable to set target Scan3dFlyingPixelsDistanceThreshold before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
 bool setExposureTimeSelectorValue(const std::string& target_exposure_time_selector, std::string& reached_exposure_time_selector)
 {
   try
@@ -2624,6 +2700,66 @@ bool ArenaCameraNode::setScan3dHDRMode(const std::string& target_scan_3d_hdr_mod
       if (ros::Time::now() > timeout)
       {
         ROS_ERROR_STREAM("Error in setScan3dHDRMode(): Unable to set target Scan3dHDRMode before timeout");
+        return false;
+      }
+      r.sleep();
+    }
+  }
+  return true;
+}
+
+bool setScan3dModeSelectorValue(const std::string& target_scan_3d_mode_selector, std::string& reached_scan_3d_mode_selector)
+{
+  try
+  {
+    GenApi::CEnumerationPtr pScan3dModeSelector = pDevice_->GetNodeMap()->GetNode("Scan3dModeSelector");
+    if (GenApi::IsWritable(pScan3dModeSelector))
+    {
+      if(target_scan_3d_mode_selector == "Processed" || target_scan_3d_mode_selector == "Raw")
+      {
+        GenICam::gcstring scan_3d_mode_selector_to_set = target_scan_3d_mode_selector.c_str();
+        Arena::SetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dModeSelector", scan_3d_mode_selector_to_set);
+        reached_scan_3d_mode_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dModeSelector").c_str();
+      }
+      else
+      {
+        ROS_WARN_STREAM("Camera does not support the value '" << target_scan_3d_mode_selector << "' for Scan3dModeSelector. Will keep the current settings");
+        reached_scan_3d_mode_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dModeSelector").c_str();
+      }
+    }
+    else
+    {
+      ROS_WARN_STREAM("Camera does not support Scan3dModeSelector. Will keep the current settings");
+      reached_scan_3d_mode_selector = Arena::GetNodeValue<GenICam::gcstring>(pDevice_->GetNodeMap(), "Scan3dModeSelector").c_str();
+    }
+  }
+
+  catch (const GenICam::GenericException& e)
+  {
+    ROS_ERROR_STREAM("An exception while setting target Scan3dModeSelector to " << target_scan_3d_mode_selector << " occurred: " << e.GetDescription());
+    return false;
+  }
+  return true;
+}
+
+bool ArenaCameraNode::setScan3dModeSelector(const std::string& target_scan_3d_mode_selector, std::string& reached_scan_3d_mode_selector)
+{
+  boost::lock_guard<boost::recursive_mutex> lock(grab_mutex_);
+
+  if (!setScan3dModeSelectorValue(target_scan_3d_mode_selector, reached_scan_3d_mode_selector))
+  {
+    // retry till timeout
+    ros::Rate r(10.0);
+    ros::Time timeout(ros::Time::now() + ros::Duration(2.0));
+    while (ros::ok())
+    {
+      if (setScan3dModeSelectorValue(target_scan_3d_mode_selector, reached_scan_3d_mode_selector))
+      {
+        break;
+      }
+      if (ros::Time::now() > timeout)
+      {
+        ROS_ERROR_STREAM("Error in setScan3dModeSelector(): Unable to set target Scan3dModeSelector before timeout");
         return false;
       }
       r.sleep();

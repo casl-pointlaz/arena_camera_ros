@@ -302,6 +302,9 @@ public:
   /** Controls if the filter for removing flying pixels is applied. */
   bool scan_3d_flying_pixels_removal_enable_;
 
+  /** Controls the distance threshold in the filter for removing flying pixels. */
+  int scan_3d_flying_pixels_distance_threshold_;
+
   /** Selects the exposure time. */
   std::string exposure_time_selector_;
 
@@ -316,6 +319,9 @@ public:
 
   /** Specifies high dynamic range (HDR) mode. */
   std::string scan_3d_hdr_mode_;
+
+  /** Selects which Scan 3D Mode is enabled. */
+  std::string scan_3d_mode_selector_;
 
   /** This node selects the specific trigger type to configure. */
   std::string trigger_selector_;

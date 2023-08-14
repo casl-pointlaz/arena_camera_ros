@@ -324,6 +324,14 @@ protected:
   bool setScan3dFlyingPixelsRemovalEnable(const bool& target_scan_3d_flying_pixels_removal_enable, bool& reached_scan_3d_flying_pixels_removal_enable);
 
   /**
+  * Update the Scan3dFlyingPixelsDistanceThreshold value
+  * @param target_scan_3d_flying_pixels_distance_threshold the target value
+  * @param reached_scan_3d_flying_pixels_distance_threshold the value that could be reached
+  * @return true if the targeted value could be reached
+  */
+  bool setScan3dFlyingPixelsDistanceThreshold(const int& target_scan_3d_flying_pixels_distance_threshold, int& reached_scan_3d_flying_pixels_distance_threshold);
+
+  /**
    * Update the ExposureTimeSelector value
    * @param target_exposure_time_selector the target value
    * @param reached_exposure_time_selector the value that could be reached
@@ -362,6 +370,14 @@ protected:
    * @return true if the targeted value could be reached
    */
   bool setScan3dHDRMode(const std::string& target_scan_3d_hdr_mode, std::string& reached_scan_3d_hdr_mode);
+
+  /**
+   * Update the Scan3dModeSelector value
+   * @param target_scan_3d_mode_selector the target value
+   * @param reached_scan_3d_mode_selector the value that could be reached
+   * @return true if the targeted value could be reached
+   */
+  bool setScan3dModeSelector(const std::string& target_scan_3d_mode_selector, std::string& reached_scan_3d_mode_selector);
 
   /**
    * Update the TriggerSelector value

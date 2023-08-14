@@ -75,6 +75,11 @@ scan_3d_spatial_filter_enable: true             # (bool) Scan3dSpatialFilterEnab
 # Controls if the filter for removing flying pixels is applied.
 scan_3d_flying_pixels_removal_enable: true      # (bool) Scan3dFlyingPixelsRemovalEnable
 
+# Controls the distance threshold in the filter for removing flying pixels.
+#   Min value:
+#   Max value:
+scan_3d_flying_pixels_distance_threshold: 15    # (int) Scan3dFlyingPixelsDistanceThreshold
+
 # Selects the exposure time. It uses an enumeration string format.
 # Can only be:
 #   "Exp1000Us": Exposure time 1000 micro seconds.
@@ -101,7 +106,7 @@ scan_3d_confidence_threshold_enable: true         # (bool) Scan3dConfidenceThres
 # Controls the minimum threshold value that determines whether or not the depth of a pixel is reliable.
 #   Min value: 0
 #   Max value: 65535
-scan_3d_confidence_threshold_min: 5000            # (int) Scan3dConfidenceThresholdMin
+scan_3d_confidence_threshold_min: 1000            # (int) Scan3dConfidenceThresholdMin
 
 # Specifies high dynamic range (HDR) mode. It uses an enumeration string format.
 # Can only be:
@@ -111,7 +116,13 @@ scan_3d_confidence_threshold_min: 5000            # (int) Scan3dConfidenceThresh
 #   "LowNoiseHDRX8": None
 #   "LowNoiseHDRX16": None
 #   "LowNoiseHDRX32": None
-scan_3d_hdr_mode: "Off"                           # (enum string) Scan3dHDRMode
+scan_3d_hdr_mode: "StandardHDR"                   # (enum string) Scan3dHDRMode
+
+# Selects which Scan 3D Mode is enabled.
+# Can only be:
+#   "Processed": Processed Scan 3D Mode.
+#   "Raw": Raw Scan 3D Mode.
+scan_3d_mode_selector: "Processed"                # (enum string) Scan3dModeSelector
 
 # This node selects the specific trigger type to configure. It uses an enumeration string format.
 # Can only be:

@@ -83,8 +83,10 @@ ArenaCameraParameter::ArenaCameraParameter()
   , exposure_time_selector_("Exp1000Us")
   , scan_3d_operating_mode_("Distance1250mmSingleFreq")
   , scan_3d_confidence_threshold_enable_(false)
+  , scan_3d_flying_pixels_distance_threshold_(0)
   , scan_3d_confidence_threshold_min_(0)
   , scan_3d_hdr_mode_("Off")
+  , scan_3d_mode_selector_("Processed")
   , trigger_selector_("FrameStart")
   , trigger_mode_("Off")
   , trigger_source_("Software")
@@ -422,6 +424,13 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
     ROS_DEBUG_STREAM("Scan3dFlyingPixelsRemovalEnable will be: " << scan_3d_flying_pixels_removal_enable_);
   }
 
+  // Get scan_3d_flying_pixels_distance_threshold_
+  if (nh.hasParam("scan_3d_flying_pixels_distance_threshold"))
+  {
+    nh.param<int>("scan_3d_flying_pixels_distance_threshold", scan_3d_flying_pixels_distance_threshold_, false);
+    ROS_DEBUG_STREAM("Scan3dFlyingPixelsDistanceThreshold will be: " << scan_3d_flying_pixels_distance_threshold_);
+  }
+
   // Get exposure_time_selector_
   if (nh.hasParam("exposure_time_selector"))
   {
@@ -455,6 +464,13 @@ void ArenaCameraParameter::readFromRosParameterServer(const ros::NodeHandle& nh)
   {
     nh.param<std::string>("scan_3d_hdr_mode", scan_3d_hdr_mode_, "Off");
     ROS_DEBUG_STREAM("Scan3HDRMode will be: " << scan_3d_hdr_mode_);
+  }
+
+  // Get scan_3d_mode_selector_
+  if (nh.hasParam("scan_3d_mode_selector"))
+  {
+    nh.param<std::string>("scan_3d_mode_selector", scan_3d_mode_selector_, "Processed");
+    ROS_DEBUG_STREAM("Scan3dModeSelector will be: " << scan_3d_mode_selector_);
   }
 
   // Get trigger_selector_
