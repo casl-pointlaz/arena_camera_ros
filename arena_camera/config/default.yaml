@@ -138,7 +138,7 @@ trigger_selector: "FrameStart"                    # (enum string) TriggerSelecto
 # Can only be:
 #   "Off": Disable current trigger.
 #   "On": Enable current trigger.
-trigger_mode: "On"                                # (enum string) TriggerMode
+trigger_mode: "Off"                                # (enum string) TriggerMode
 
 # This node specifies the source of the trigger. It can be a software internal signal of a physical input hardware signal. It uses an enumeration string format.
 # Can only be:
