@@ -125,3 +125,30 @@ Even if multiple launch exist in */arena_camera_ros/arena_camera/launch*. Only 2
 - **arena_camera_node.launch**: To operate one ToF camera using ROS.
 
 The parameters of the cameras for either launch files can be tune from the config file */arena_camera_ros/arena_camera/config/**default.yaml***
+
+
+#### Possible configurations
+
+Here are the 3 different behaviors for the ToF image acquisition synchronisation and how to tune the parameters to reach them
+(the other parameters values do not matter for the image acquisition synchronisation):
+
+- **ToF image acquisition synchronised on a physical trigger sent at 10Hz:**
+   - acquisition_mode: "Continuous"
+   - trigger_selector: "FrameStart"
+   - trigger_mode: "On"
+   - trigger_source: "Line0"
+   - trigger_activation: "RisingEdge"
+   - trigger_delay: 0.0
+
+- **ToF image acquisition synchronised on a Software Trigger sent at 10Hz (standard node behavior):**
+   - acquisition_mode: "Continuous"
+   - trigger_selector: "FrameStart"
+   - trigger_mode: "On"
+   - trigger_source: "Software"
+   - trigger_activation: "RisingEdge"
+   - trigger_delay: 0.0
+
+- **ToF image acquisition synchronised on the camera internal timer at 10Hz:**
+   - frame_rate: 10.0
+   - acquisition_mode: "Continuous"
+   - trigger_mode: "Off"
