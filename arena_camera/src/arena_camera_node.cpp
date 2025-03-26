@@ -962,7 +962,7 @@ void ArenaCameraNode::spin()
           point_cloud.points[i].y = (data * scale_y + offset_y) * 0.001;
           // z
           data = (img_raw_msg_.data[i*8+5] << 8) + img_raw_msg_.data[i*8+4];
-          point_cloud.points[i].z = (data * scale_z) * 0.001;
+          point_cloud.points[i].z = (data * scale_z + 3) * 0.001;
           // intensity
           data = (img_raw_msg_.data[i*8+7] << 8) + img_raw_msg_.data[i*8+6];
           point_cloud.points[i].intensity = (float)data;
